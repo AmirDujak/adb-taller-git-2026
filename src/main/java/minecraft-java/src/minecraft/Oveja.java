@@ -13,13 +13,16 @@ public class Oveja extends NoHostiles {
         this.esquilada = false;
     }
 
+    public boolean isEsquilada() {
+        return esquilada;
+    }
+
     @Override
-    public void interactuar() {
+    protected String interactuar() {
         if (!esquilada) {
             esquilada = true;
-            System.out.println(getNombre() + " fue esquilada, se obtiene lana.");
-        } else {
-            System.out.println(getNombre() + " ya no tiene lana para esquilar.");
+            return getNombre() + " fue esquilada, se obtiene lana.";
         }
+        return getNombre() + " ya no tiene lana para esquilar.";
     }
 }
