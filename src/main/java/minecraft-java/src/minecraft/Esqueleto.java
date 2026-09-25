@@ -11,7 +11,7 @@ public class Esqueleto extends Hostiles {
     }
 
     @Override
-    public void accionDeAtaque() {
-        System.out.println(getNombre() + " dispara una flecha a distancia.");
+    protected String accionDeAtaque() {
+        return getNombre() + " dispara una flecha a distancia.";
     }
 }

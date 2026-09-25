@@ -3,14 +3,18 @@ package minecraft;
 /**
  * Representa el cuerpo/colisión física de una entidad (lo que en el
  * diagrama aparece como "-Hitbox // fisico").
+ * Es inmutable: una vez creada no se puede deformar desde afuera.
  */
-public class Hitbox {
+public final class Hitbox {
 
-    private double ancho;
-    private double alto;
-    private double profundidad;
+    private final double ancho;
+    private final double alto;
+    private final double profundidad;
 
     public Hitbox(double ancho, double alto, double profundidad) {
+        if (ancho <= 0 || alto <= 0 || profundidad <= 0) {
+            throw new IllegalArgumentException("Las dimensiones de la hitbox deben ser positivas");
+        }
         this.ancho = ancho;
         this.alto = alto;
         this.profundidad = profundidad;
@@ -26,13 +30,6 @@ public class Hitbox {
 
     public double getProfundidad() {
         return profundidad;
-    }
-
-    /**
-     * Colisión simple tipo AABB (ejemplo básico, se puede refinar luego).
-     */
-    public boolean colisionaCon(Hitbox otro) {
-        return this.ancho + otro.ancho > 0 && this.alto + otro.alto > 0;
     }
 
     @Override

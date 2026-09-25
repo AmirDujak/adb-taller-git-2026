@@ -13,13 +13,23 @@ public class Creeper extends Hostiles {
         this.cargado = false;
     }
 
-    @Override
-    public void accionDeAtaque() {
-        System.out.println(getNombre() + " se acerca sigilosamente y explota"
-                + (cargado ? " ¡con carga extra!" : "."));
+    public boolean isCargado() {
+        return cargado;
     }
 
     public void cargarConRayo() {
         this.cargado = true;
+    }
+
+    @Override
+    protected String describirAvance() {
+        return getNombre() + " se acerca sigilosamente, sin hacer ruido";
+    }
+
+    /** A diferencia del resto, el Creeper muere al atacar. */
+    @Override
+    protected String accionDeAtaque() {
+        return getNombre() + " explota" + (cargado ? " ¡con carga extra!" : "")
+                + ". " + desaparecer();
     }
 }

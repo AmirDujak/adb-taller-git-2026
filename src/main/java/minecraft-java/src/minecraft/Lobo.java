@@ -13,13 +13,16 @@ public class Lobo extends NoHostiles {
         this.domesticado = false;
     }
 
+    public boolean isDomesticado() {
+        return domesticado;
+    }
+
     @Override
-    public void interactuar() {
+    protected String interactuar() {
         if (!domesticado) {
             domesticado = true;
-            System.out.println(getNombre() + " fue domesticado con huesos.");
-        } else {
-            System.out.println(getNombre() + " menea la cola, ya es tu mascota.");
+            return getNombre() + " fue domesticado con huesos.";
         }
+        return getNombre() + " menea la cola, ya es tu mascota.";
     }
 }

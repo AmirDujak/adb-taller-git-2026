@@ -11,7 +11,7 @@ public class Zombie extends Hostiles {
     }
 
     @Override
-    public void accionDeAtaque() {
-        System.out.println(getNombre() + " golpea cuerpo a cuerpo al jugador.");
+    protected String accionDeAtaque() {
+        return getNombre() + " golpea cuerpo a cuerpo al jugador.";
     }
 }
