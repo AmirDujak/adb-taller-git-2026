@@ -191,6 +191,105 @@ compilación limpia:
   - La visibilidad de cada miembro (`-` privado, `#` protegido, `+` público; `*` indica los métodos abstractos)
 - También agregué la tabla de endpoints y un resumen de las decisiones de diseño.
 
+**Commit de las entradas 4, 5 y 6:** `8475407` — agregado de las consignas restantes (integrado a `main`
+con el PR #2, ver entrada 7).
+
+---
+
+## Entrada 7 — Trabajo colaborativo con Pull Requests
+
+**Fecha:** 2026-09-25
+
+En la entrada 3 mi compañero pusheó directo a `main`. Para que ningún cambio llegue a `main` sin
+revisión, adoptamos un flujo con **ramas y Pull Requests**: cada uno trabaja en una rama propia, abre
+un PR y el otro lo revisa, lo aprueba y hace el merge.
+
+### Configuración del repositorio (dueño)
+
+1. Agregué a mi compañero como colaborador en **Settings → Collaborators → Add people**.
+2. Protegí la rama `main` en **Settings → Branches → Add branch ruleset** con estas reglas:
+   - *Require a pull request before merging*
+   - *Require approvals: 1*
+
+   Con esto nadie puede hacer push directo a `main`, y un PR no se puede mezclar sin aprobación.
+
+### Flujo de quien propone el cambio
+
+```bash
+git checkout main
+git pull origin main                      # traer lo último de main
+git checkout -b feature/nombre-del-cambio # trabajar en una rama propia
+
+# ... cambios ...
+git add .
+git commit -m "descripción del cambio"
+git push -u origin feature/nombre-del-cambio
+```
+
+Después, en GitHub, abre el PR con **Compare & pull request** y asigna al otro como *Reviewer*.
+
+### Flujo de quien revisa
+
+1. En **Pull requests → Files changed** reviso las diferencias y comento las líneas que haga falta.
+2. En **Review changes** elijo una opción:
+   - **Approve** para aprobar el PR.
+   - **Request changes** para pedir correcciones. Quien abrió el PR sube nuevos commits a la misma
+     rama y el PR se actualiza solo.
+3. Una vez aprobado, hago el merge con **Merge pull request → Confirm merge** y borro la rama.
+4. Actualizo la copia local:
+
+```bash
+git checkout main
+git pull origin main
+```
+
+### Pull Requests realizados
+
+| PR | Rama | Commit | Autor del cambio | Mergeado por |
+|---|---|---|---|---|
+| #1 | `feature/agregado-archivo-de-texto-prueba` | `4cf54ba` agregado archivo de texto prueba.txt | Cemelele (compañero) | Amir Dujak → merge `54845eb` |
+| #2 | `feature/agregado-consignas-restantes` | `8475407` agregado de las consignas restantes (consignas 4, 5 y 6) | AmirDujak | Matías Duarte → merge `c041325` |
+
+Probamos el flujo en los dos sentidos. En el PR #1 mi compañero propuso un cambio y yo lo integré.
+En el PR #2 yo subí las consignas 4 a 6 y él las revisó e integró a `main`.
+
+Historial resultante (`git log --oneline --graph`):
+
+```
+*   c041325 Merge pull request #2 from AmirDujak/feature/agregado-consignas-restantes
+|\
+| * 8475407 agregado de las consignas restantes
+* |   54845eb Merge pull request #1 from AmirDujak/feature/agregado-archivo-de-texto-prueba
+|\ \
+| |/
+|/|
+| * 4cf54ba agregado archivo de texto prueba.txt
+|/
+* 11ed4ae modified walter.txt
+```
+
+### Resolución de conflictos
+
+Si GitHub indica *"This branch has conflicts"*, quien abrió el PR trae `main` a su rama, resuelve
+los conflictos y vuelve a subir:
+
+```bash
+git checkout feature/nombre-del-cambio
+git pull origin main
+# resolver los archivos marcados con <<<<<<< ======= >>>>>>>
+git add .
+git commit
+git push
+```
+
+### Aprendizajes
+
+- `git pull` baja cambios del remoto. Un **Pull Request** es una solicitud en GitHub para revisar y
+  mezclar una rama; son cosas distintas.
+- El autor de un PR no puede aprobar el suyo. La revisión siempre la hace otra persona.
+- Trabajar en ramas mantiene `main` estable y deja registrado en GitHub quién propuso, revisó y
+  aprobó cada cambio.
+
 ---
 
 ## Estado final
