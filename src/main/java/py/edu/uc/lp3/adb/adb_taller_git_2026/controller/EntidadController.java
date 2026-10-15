@@ -10,6 +10,7 @@ import minecraft.Entidad;
 import minecraft.Esqueleto;
 import minecraft.Lobo;
 import minecraft.Oveja;
+import minecraft.Player;
 import minecraft.Zombie;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -28,8 +29,12 @@ import org.springframework.web.server.ResponseStatusException;
  *
  * Ejemplos:
  *   GET /entidad/zombie
+ *   GET /entidades/zombie?vida=20&danoBase=5&velocidad=0.7&hostilidad=true
  *   GET /entidad/aldeano?profesion=Herrero
  *   GET /entidad/creeper?danio=5
+ *   GET /entidades/esqueleto/disparar?vida=20&danoBase=3&velocidad=0.75&usaArco=true
+ *   GET /entidades/esqueleto/disparar?vida=20&danoBase=3&velocidad=0.75&usaArco=true&distancia=10
+ *   GET /entidades/comportamientos?vida=20&danoBase=5&velocidad=0.7&hostilidad=true&comercializacion=false
  *   GET /entidades
  */
 @RestController
@@ -38,6 +43,7 @@ public class EntidadController {
     private static final List<String> TIPOS =
             List.of("creeper", "zombie", "esqueleto", "lobo", "oveja", "aldeano");
 
+    /** Crea una entidad por tipo y opcionalmente le aplica daño. Mantiene la ruta histórica /entidad/{tipo}. */
     @GetMapping("/entidad/{tipo}")
     public Map<String, Object> crear(@PathVariable String tipo,
                                      @RequestParam(defaultValue = "Granjero") String profesion,
@@ -46,8 +52,65 @@ public class EntidadController {
         return describir(entidad, danio);
     }
 
+    /** Construye un Zombie con los parámetros recibidos por URL y devuelve sus datos en JSON. */
+    @GetMapping("/zombie")
+    public Map<String, Object> zombie(
+            @RequestParam(defaultValue = "20") int vida,
+            @RequestParam(defaultValue = "5") int danoBase,
+            @RequestParam(defaultValue = "0.7") double velocidad,
+            @RequestParam(defaultValue = "true") boolean hostilidad) {
+        Zombie zombie = new Zombie(vida, danoBase, velocidad, hostilidad);
+        return describir(zombie, 0);
+    }
+
+    /** Disparo del esqueleto (sobrecarga). Sin distancia invoca disparar(); con distancia invoca disparar(int). */
+    @GetMapping("/esqueleto/disparar")
+    public Map<String, Object> esqueletoDisparar(
+            @RequestParam(defaultValue = "20") int vida,
+            @RequestParam(defaultValue = "3") int danoBase,
+            @RequestParam(defaultValue = "0.75") double velocidad,
+            @RequestParam(defaultValue = "true") boolean usaArco,
+            @RequestParam(required = false) Integer distancia) {
+        Esqueleto esqueleto = new Esqueleto(vida, danoBase, velocidad, usaArco);
+        Map<String, Object> json = new LinkedHashMap<>();
+        json.put("entidad", esqueleto);
+        json.put("disparar", distancia != null ? esqueleto.disparar(distancia) : esqueleto.disparar());
+        json.put("vidaFinal", esqueleto.getVida());
+        json.put("viva", esqueleto.isViva());
+        return json;
+    }
+
+    /**
+     * Construye un Zombie y un Aldeano con los parámetros de la URL y devuelve en JSON el
+     * comportamiento de cada uno. Los guarda en una List<Entidad> y llama a comportamiento()
+     * sin distinguir el tipo concreto; cada clase responde a su manera.
+     */
+    @GetMapping("/comportamientos")
+    public List<Map<String, Object>> comportamientos(
+            @RequestParam(defaultValue = "20") int vida,
+            @RequestParam(defaultValue = "5") int danoBase,
+            @RequestParam(defaultValue = "0.7") double velocidad,
+            @RequestParam(defaultValue = "true") boolean hostilidad,
+            @RequestParam(defaultValue = "false") boolean comercializacion) {
+        Zombie zombie = new Zombie(vida, danoBase, velocidad, hostilidad);
+        String profesion = comercializacion ? "Comerciante" : "Granjero";
+        Aldeano aldeano = new Aldeano(profesion);
+
+        List<Entidad> entidades = List.of(zombie, aldeano);
+        return entidades.stream()
+                .map(e -> {
+                    Map<String, Object> json = new LinkedHashMap<>();
+                    json.put("tipo", e.getClass().getSimpleName());
+                    json.put("nombre", e.getNombre());
+                    json.put("comportamiento", e.comportamiento());
+                    json.put("viva", e.isViva());
+                    return json;
+                })
+                .toList();
+    }
+
     /** Todas las entidades del mundo, cada una mostrando su propio comportamiento. */
-    @GetMapping("/entidades")
+    @GetMapping
     public List<Map<String, Object>> todas() {
         return TIPOS.stream()
                 .map(tipo -> crearEntidad(tipo, "Granjero"))

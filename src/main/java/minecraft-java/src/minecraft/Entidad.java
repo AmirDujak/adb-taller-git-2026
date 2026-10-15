@@ -21,10 +21,19 @@ public abstract class Entidad implements Movimientos {
     private final Hitbox hitbox;
     private final double velocidadMovimiento;
     private final List<String> drop;
+    private final int danoBase;
 
+    /** Constructor con daño base igual a cero (mantiene compatibilidad con las subclases existentes). */
     protected Entidad(String nombre, int vida, Hitbox hitbox,
                        List<String> sonidos, List<String> drop,
                        double velocidadMovimiento) {
+        this(nombre, vida, hitbox, sonidos, drop, velocidadMovimiento, 0);
+    }
+
+    /** Constructor completo que recibe también el daño base de la entidad. */
+    protected Entidad(String nombre, int vida, Hitbox hitbox,
+                       List<String> sonidos, List<String> drop,
+                       double velocidadMovimiento, int danoBase) {
         if (nombre == null || nombre.isBlank()) {
             throw new IllegalArgumentException("La entidad necesita un nombre");
         }
@@ -34,12 +43,16 @@ public abstract class Entidad implements Movimientos {
         if (velocidadMovimiento < 0) {
             throw new IllegalArgumentException("La velocidad no puede ser negativa");
         }
+        if (danoBase < 0) {
+            throw new IllegalArgumentException("El daño base no puede ser negativo");
+        }
         this.nombre = nombre;
         this.vida = vida;
         this.hitbox = Objects.requireNonNull(hitbox, "hitbox");
         this.sonidos = List.copyOf(sonidos);
         this.drop = List.copyOf(drop);
         this.velocidadMovimiento = velocidadMovimiento;
+        this.danoBase = danoBase;
     }
 
     // ---- Getters (las listas son inmutables) ----
@@ -62,6 +75,10 @@ public abstract class Entidad implements Movimientos {
 
     public double getVelocidadMovimiento() {
         return velocidadMovimiento;
+    }
+
+    public int getDanoBase() {
+        return danoBase;
     }
 
     public List<String> getDrop() {
@@ -138,7 +155,7 @@ public abstract class Entidad implements Movimientos {
 
     @Override
     public String toString() {
-        return String.format("%s [vida=%d, hitbox=%s, drop=%s]",
-                nombre, vida, hitbox, drop);
+        return String.format("%s [vida=%d, danoBase=%d, velocidad=%.2f, hitbox=%s, drop=%s]",
+                nombre, vida, danoBase, velocidadMovimiento, hitbox, drop);
     }
 }

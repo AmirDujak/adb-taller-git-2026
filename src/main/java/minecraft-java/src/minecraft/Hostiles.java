@@ -10,10 +10,18 @@ public abstract class Hostiles extends Entidad {
 
     private final double rangoDeAggro;
 
+    /** Constructor con daño base igual a cero (mantiene compatibilidad con las subclases existentes). */
     protected Hostiles(String nombre, int vida, Hitbox hitbox,
                         List<String> sonidos, List<String> drop,
                         double velocidadMovimiento, double rangoDeAggro) {
-        super(nombre, vida, hitbox, sonidos, drop, velocidadMovimiento);
+        this(nombre, vida, hitbox, sonidos, drop, velocidadMovimiento, 0, rangoDeAggro);
+    }
+
+    /** Constructor completo que recibe también el daño base de la entidad. */
+    protected Hostiles(String nombre, int vida, Hitbox hitbox,
+                        List<String> sonidos, List<String> drop,
+                        double velocidadMovimiento, int danoBase, double rangoDeAggro) {
+        super(nombre, vida, hitbox, sonidos, drop, velocidadMovimiento, danoBase);
         if (rangoDeAggro <= 0) {
             throw new IllegalArgumentException("El rango de aggro debe ser positivo");
         }
@@ -32,9 +40,9 @@ public abstract class Hostiles extends Entidad {
         return distanciaAlJugador <= rangoDeAggro;
     }
 
-    /** Un mob hostil, cuando se activa, ataca. */
+    /** Un mob hostil, cuando se activa, ataca. Las subclases pueden redefinirlo (por ejemplo, un Zombie puede no ser hostil). */
     @Override
-    public final String comportamiento() {
+    public String comportamiento() {
         return isViva() ? accionDeAtaque() : getNombre() + " ya desapareció.";
     }
 
