@@ -12,6 +12,66 @@ sobrecarga y sobrescritura de métodos.
 
 La aplicación queda disponible en `http://localhost:8080`.
 
+## CRUD persistente de Entidad (3 capas)
+
+El CRUD usa `/api/entidades`, separado de los ejemplos de comportamiento del juego.
+
+```text
+HTTP → EntidadCrudController → EntidadService → EntidadRepository → H2
+         presentación            negocios         persistencia
+```
+
+`EntidadRegistro` es el modelo JPA de los atributos comunes de `minecraft.Entidad`:
+nombre, vida, daño base, velocidad, hitbox, sonidos y drop. Se mantiene intacta la
+jerarquía abstracta del juego; el CRUD no guarda estados específicos de las subclases
+ni ejecuta comportamientos como explotar o esquilar.
+
+| Método | Ruta | Resultado |
+|---|---|---|
+| POST | `/api/entidades` | Crear: `201 Created`, cuerpo y cabecera `Location` |
+| GET | `/api/entidades` | Listar registros: `200 OK` (inicialmente `[]`) |
+| GET | `/api/entidades/{id}` | Buscar: `200 OK` o `404 Not Found` |
+| PUT | `/api/entidades/{id}` | Reemplazar todos los datos: `200 OK` o `404 Not Found` |
+| DELETE | `/api/entidades/{id}` | Eliminar: `204 No Content` o `404 Not Found` |
+
+Ejemplo de alta (el mismo cuerpo sirve para PUT):
+
+```bash
+curl -i -X POST http://localhost:8080/api/entidades \
+  -H 'Content-Type: application/json' \
+  -d '{"nombre":"Zombie","vida":20,"danoBase":5,"velocidadMovimiento":0.7,"hitbox":{"ancho":0.6,"alto":1.95,"profundidad":0.6},"sonidos":["gruñido","gemido"],"drop":["carne_podrida"]}'
+
+curl http://localhost:8080/api/entidades
+curl http://localhost:8080/api/entidades/1
+curl -i -X DELETE http://localhost:8080/api/entidades/1
+```
+
+Todos los campos del ejemplo son obligatorios; `sonidos` y `drop` pueden ser listas
+vacías. El id lo genera la base y se toma de la ruta para actualizar o eliminar.
+El service valida nombre no vacío (hasta 255 caracteres), vida positiva, daño no
+negativo, velocidad finita no negativa y dimensiones finitas positivas. También
+rechaza elementos nulos, vacíos o de más de 255 caracteres en las listas.
+Las violaciones devuelven `400 Bad Request` con `{"error":"mensaje"}`.
+
+### Base H2
+
+Los datos se guardan en archivo en `./data/entidades` y sobreviven a los reinicios.
+Spring Data JPA implementa el repositorio y Hibernate actualiza el esquema al iniciar.
+La carpeta `data/` está excluida de Git.
+
+Con la aplicación ejecutándose, abrir `http://localhost:8080/h2-console`:
+
+- JDBC URL: `jdbc:h2:file:./data/entidades`
+- Usuario: `sa`
+- Contraseña: vacía
+
+Esta configuración es para desarrollo local. Las pruebas usan otra H2 **en memoria**
+para no modificar la base local:
+
+```bash
+./mvnw test
+```
+
 ## Endpoints
 
 ### Estado del servicio

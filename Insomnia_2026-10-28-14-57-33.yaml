@@ -1,0 +1,126 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: minecraft
+meta:
+  id: wrk_b73def9ce297445997c4fa416372b8ea
+  created: 1793209949755
+  modified: 1793209949755
+  description: ""
+collection:
+  - url: ""
+    name: New Request
+    meta:
+      id: req_9fd286b9cc61471eb72b0bfcee42d630
+      created: 1793210023776
+      modified: 1793210049957
+      isPrivate: false
+      description: ""
+      sortKey: -1793210023776
+    method: GET
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: ""
+    name: New Request
+    meta:
+      id: req_d4fc227dbf424e74b04d11f14158db9a
+      created: 1793210094572
+      modified: 1793210118329
+      isPrivate: false
+      description: ""
+      sortKey: -1793210094572
+    method: GET
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - name: entidades
+    meta:
+      id: fld_47ee51f45aaa43f08993a08549fabbe7
+      created: 1793209976232
+      modified: 1793210089512
+      sortKey: -1793209976232
+      description: ""
+    children:
+      - url: http://localhost:8080/api/entidades
+        name: listar entidades
+        meta:
+          id: req_0d02e0d1fcba4d60983622626a3dcdc7
+          created: 1793210049862
+          modified: 1793210081407
+          isPrivate: false
+          description: ""
+          sortKey: -1793210081374
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/entidades
+        name: crear entidades
+        meta:
+          id: req_fe570afa12f24a2a884bf92553452ca2
+          created: 1793210118257
+          modified: 1793210170374
+          isPrivate: false
+          description: ""
+          sortKey: -1793210081274
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"nombre": "Zombie",
+            	"vida": 20,
+            	"danoBase": 5,
+            	"velocidadMovimiento": 0.7,
+            	"hitbox": {
+            		"ancho": 0.6,
+            		"alto": 1.95,
+            		"profundidad": 0.6
+            	},
+            	"sonidos": [
+            		"gruñido",
+            		"gemido"
+            	],
+            	"drop": [
+            		"carne_podrida"
+            	]
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_4c1abf05f0740a39ff056a91ec8f3aa4481623fa
+    created: 1793209949756
+    modified: 1793209949756
+environments:
+  name: Base Environment
+  meta:
+    id: env_4c1abf05f0740a39ff056a91ec8f3aa4481623fa
+    created: 1793209949756
+    modified: 1793209949756
+    isPrivate: false
