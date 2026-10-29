@@ -51,7 +51,7 @@ collection:
       sortKey: -1793209976232
       description: ""
     children:
-      - url: http://localhost:8080/api/entidades
+      - url: http://localhost:8080/api/lp3/entidades
         name: listar entidades
         meta:
           id: req_0d02e0d1fcba4d60983622626a3dcdc7
@@ -69,7 +69,7 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: http://localhost:8080/api/entidades
+      - url: http://localhost:8080/api/lp3/entidades
         name: crear entidades
         meta:
           id: req_fe570afa12f24a2a884bf92553452ca2
@@ -83,7 +83,9 @@ collection:
           mimeType: application/json
           text: |-
             {
-            	"nombre": "Zombie",
+              "nombre": "Zombie",
+              "tipo": "ZOMBIE",
+              "posicion": {"x": 1, "y": 64, "z": 0},
             	"vida": 20,
             	"danoBase": 5,
             	"velocidadMovimiento": 0.7,
@@ -111,6 +113,47 @@ collection:
             send: true
             store: true
           rebuildPath: true
+      - url: http://localhost:8080/api/lp3/entidades
+        name: crear creeper con posicion
+        meta:
+          id: req_6af93b45e60c4e1aab30392d2c0159e7
+          isPrivate: false
+          description: Guardar el ID devuelto para usarlo en la explosion.
+          sortKey: -1793210081174
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "nombre": "Creeper",
+              "tipo": "CREEPER",
+              "cargado": false,
+              "vida": 20,
+              "danoBase": 0,
+              "velocidadMovimiento": 0.8,
+              "hitbox": {"ancho": 0.6, "alto": 1.7, "profundidad": 0.6},
+              "sonidos": ["siseo"],
+              "drop": ["polvora"],
+              "posicion": {"x": 0, "y": 64, "z": 0}
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+      - url: http://localhost:8080/api/lp3/explosiones/simular
+        name: explotar creeper - modifica H2
+        meta:
+          id: req_f7b4a001bc6849e692e405e295f634dc
+          isPrivate: false
+          description: Reemplazar creeperId por un ID real. Borra al Creeper y a los objetivos que mueren.
+          sortKey: -1793210081074
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {"creeperId": 1}
+        headers:
+          - name: Content-Type
+            value: application/json
 cookieJar:
   name: Default Jar
   meta:

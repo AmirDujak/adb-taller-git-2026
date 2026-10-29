@@ -1,7 +1,7 @@
 # Read Me First
 The following was discovered as part of building this project:
 
-* The original package name 'py.edu.uc.lp3.adb.adb-taller-git-2026' is invalid and this project uses 'py.edu.uc.lp3.adb.adb_taller_git_2026' instead.
+* The project uses the base package `py.edu.uc.lp3` and the entry point `py.edu.uc.lp3.Application`, following the LP3 template structure.
 
 # Getting Started
 
@@ -28,4 +28,3 @@ Due to Maven's design, elements are inherited from the parent POM to the project
 While most of the inheritance is fine, it also inherits unwanted elements like `<license>` and `<developers>` from the parent.
 To prevent this, the project POM contains empty overrides for these elements.
 If you manually switch to a different parent and actually want the inheritance, you need to remove those overrides.
-

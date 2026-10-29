@@ -12,38 +12,67 @@ sobrecarga y sobrescritura de métodos.
 
 La aplicación queda disponible en `http://localhost:8080`.
 
-## CRUD persistente de Entidad (3 capas)
+## Estructura del proyecto
 
-El CRUD usa `/api/entidades`, separado de los ejemplos de comportamiento del juego.
+Organizado siguiendo el [template de LP3](https://github.com/alefq/lp3-template-tp),
+adaptado al dominio de Minecraft:
 
 ```text
-HTTP → EntidadCrudController → EntidadService → EntidadRepository → H2
-         presentación            negocios         persistencia
+src/main/java/py/edu/uc/lp3/
+├── Application.java          # Punto de entrada de Spring Boot
+├── constants/ApiPaths.java  # Rutas de la API
+├── domain/                  # Jerarquía del juego y modelos persistentes JPA
+├── exceptions/              # Excepciones de negocio
+├── repository/              # Acceso a datos con Spring Data JPA
+├── rest/
+│   ├── controller/          # Presentación HTTP
+│   └── dto/                 # Datos de entrada del CRUD
+└── service/
+    ├── EntidadService.java  # Contrato de negocio
+    └── impl/                # Implementación y validaciones
 ```
 
-`EntidadRegistro` es el modelo JPA de los atributos comunes de `minecraft.Entidad`:
-nombre, vida, daño base, velocidad, hitbox, sonidos y drop. Se mantiene intacta la
-jerarquía abstracta del juego; el CRUD no guarda estados específicos de las subclases
-ni ejecuta comportamientos como explotar o esquilar.
+Se mantienen **Java 21 y Spring Boot 4.1.1** del proyecto original. Del template
+se adopta la organización, no sus versiones antiguas de Java y Spring Boot ni sus
+clases de ejemplo de otro dominio. Se usa `jakarta.persistence`, no `javax.persistence`.
+La inyección de dependencias se realiza por constructor.
+
+## CRUD persistente de Entidad (3 capas)
+
+El CRUD usa `/api/lp3/entidades`, separado de los ejemplos de comportamiento del juego.
+La ruta anterior `/api/entidades` sigue disponible como alias para todas las operaciones.
+La cabecera `Location` de las altas siempre apunta a la ruta principal `/api/lp3/entidades/{id}`.
+
+```text
+HTTP → EntidadCrudController → EntidadService (interfaz)
+                                  ↓
+                             EntidadServiceImpl → EntidadRepository → H2
+                                  negocios           persistencia
+```
+
+`EntidadRegistro` es el modelo JPA de los atributos comunes de `py.edu.uc.lp3.domain.Entidad`:
+nombre, vida, daño base, velocidad, hitbox, sonidos y drop. También guarda el tipo,
+la carga del Creeper y la posición para las explosiones persistentes.
+La jerarquía abstracta del juego se conserva; las demostraciones GET siguen siendo temporales.
 
 | Método | Ruta | Resultado |
 |---|---|---|
-| POST | `/api/entidades` | Crear: `201 Created`, cuerpo y cabecera `Location` |
-| GET | `/api/entidades` | Listar registros: `200 OK` (inicialmente `[]`) |
-| GET | `/api/entidades/{id}` | Buscar: `200 OK` o `404 Not Found` |
-| PUT | `/api/entidades/{id}` | Reemplazar todos los datos: `200 OK` o `404 Not Found` |
-| DELETE | `/api/entidades/{id}` | Eliminar: `204 No Content` o `404 Not Found` |
+| POST | `/api/lp3/entidades` | Crear: `201 Created`, cuerpo y cabecera `Location` |
+| GET | `/api/lp3/entidades` | Listar registros: `200 OK` (inicialmente `[]`) |
+| GET | `/api/lp3/entidades/{id}` | Buscar: `200 OK` o `404 Not Found` |
+| PUT | `/api/lp3/entidades/{id}` | Reemplazar todos los datos: `200 OK` o `404 Not Found` |
+| DELETE | `/api/lp3/entidades/{id}` | Eliminar: `204 No Content` o `404 Not Found` |
 
 Ejemplo de alta (el mismo cuerpo sirve para PUT):
 
 ```bash
-curl -i -X POST http://localhost:8080/api/entidades \
+curl -i -X POST http://localhost:8080/api/lp3/entidades \
   -H 'Content-Type: application/json' \
   -d '{"nombre":"Zombie","vida":20,"danoBase":5,"velocidadMovimiento":0.7,"hitbox":{"ancho":0.6,"alto":1.95,"profundidad":0.6},"sonidos":["gruñido","gemido"],"drop":["carne_podrida"]}'
 
-curl http://localhost:8080/api/entidades
-curl http://localhost:8080/api/entidades/1
-curl -i -X DELETE http://localhost:8080/api/entidades/1
+curl http://localhost:8080/api/lp3/entidades
+curl http://localhost:8080/api/lp3/entidades/1
+curl -i -X DELETE http://localhost:8080/api/lp3/entidades/1
 ```
 
 Todos los campos del ejemplo son obligatorios; `sonidos` y `drop` pueden ser listas
@@ -53,11 +82,34 @@ negativo, velocidad finita no negativa y dimensiones finitas positivas. También
 rechaza elementos nulos, vacíos o de más de 255 caracteres en las listas.
 Las violaciones devuelven `400 Bad Request` con `{"error":"mensaje"}`.
 
+Campos adicionales de POST y PUT:
+
+```json
+{
+  "tipo": "CREEPER",
+  "cargado": false,
+  "posicion": {"x": 0, "y": 64, "z": 0}
+}
+```
+
+Se agregan al cuerpo completo anterior, no lo reemplazan. Tipos: `CREEPER`, `PLAYER`,
+`ZOMBIE`, `ESQUELETO`, `LOBO`, `OVEJA`, `ALDEANO`, `CERDO`, `ZOMBIE_PEQUENO`, `OTRA`.
+Solo un Creeper puede tener `cargado: true`. Las coordenadas deben ser finitas y completas.
+En altas, si se omite el tipo se deduce del nombre exacto conocido (si no, `OTRA`),
+la carga es falsa y la posición queda sin definir. En PUT, omitir estos campos nuevos
+o enviarlos como `null` conserva sus valores anteriores, para mantener los clientes existentes.
+
 ### Base H2
 
 Los datos se guardan en archivo en `./data/entidades` y sobreviven a los reinicios.
 Spring Data JPA implementa el repositorio y Hibernate actualiza el esquema al iniciar.
 La carpeta `data/` está excluida de Git.
+
+Al reiniciar, `ddl-auto=update` agrega las columnas de tipo, carga y posición sin borrar
+las entidades ni cambiar sus IDs. Las filas antiguas conservan su vida; el tipo se deduce
+de su nombre cuando aún no fue guardado explícitamente. **No se les inventa una posición**:
+hay que asignarla mediante PUT para que participen en las explosiones.
+Antes de actualizar el servicio, es recomendable respaldar `data/` con el servicio detenido.
 
 Con la aplicación ejecutándose, abrir `http://localhost:8080/h2-console`:
 
@@ -71,6 +123,83 @@ para no modificar la base local:
 ```bash
 ./mvnw test
 ```
+
+## Explosiones persistentes (regla de negocio)
+
+```text
+POST /api/lp3/explosiones/simular
+HTTP → ExplosionController → ExplosionService → ExplosionServiceImpl → EntidadRepository → H2
+                                                  ↓
+                                   Creeper + EntidadRegistro + Posicion
+```
+
+**Esta operación modifica la base de datos**, aunque la ruta conserve el nombre `simular`.
+El cuerpo ahora recibe solamente `creeperId`: ya no se envían vidas ni distancias.
+El servicio consulta el Creeper y las entidades guardadas; `Posicion` calcula la distancia
+euclidiana tridimensional entre sus coordenadas. `Creeper` define el daño por distancia
+y carga, y `EntidadRegistro` descuenta la vida de cada objetivo sin dejarla negativa.
+Puede afectar a cualquier tipo de entidad, no solo a Player y Zombie.
+
+Reglas propias de esta simulación (no una reproducción exacta de Minecraft):
+
+- Radio de 3 bloques y daño máximo de 20 (40 si el Creeper está cargado).
+- Daño = `round(maximo * (1 - distancia / 3))` para distancias menores a 3.
+- En el borde del radio y fuera de él, el daño es cero.
+- La vida de los supervivientes se actualiza en H2.
+- Las entidades que quedan con vida 0 se **eliminan**, junto con sus sonidos y drops.
+- El Creeper que explota también se **elimina**, aunque no haya objetivos cerca.
+- Otros Creepers alcanzados reciben daño normal, sin explosiones en cadena.
+- `danoRecibido` indica la vida realmente perdida, limitada a la vida inicial.
+- La respuesta incluye `radio`, `creeper` y una lista `objetivos` con distancia,
+  vida inicial, daño recibido, vida final e indicador `eliminado`.
+- Solo se incluyen los objetivos con posición y distancia menor o igual al radio.
+  Las entidades sin posición o fuera del radio no se modifican.
+- ID inexistente: `404`. ID inválido, origen que no es Creeper o sin posición: `400`.
+- La operación completa es transaccional: si falla, no se guarda ningún cambio parcial.
+  Las explosiones bloquean las filas durante la operación para no repetir el estado inicial.
+
+### Ejemplo para Insomnia
+
+Crear un Creeper en `(0,64,0)`:
+
+```bash
+curl --request POST --url http://localhost:8080/api/lp3/entidades \
+  --header 'Content-Type: application/json' \
+  --data '{"nombre":"Creeper","tipo":"CREEPER","cargado":false,"vida":20,
+    "danoBase":0,"velocidadMovimiento":0.8,
+    "hitbox":{"ancho":0.6,"alto":1.7,"profundidad":0.6},
+    "sonidos":["siseo"],"drop":["polvora"],"posicion":{"x":0,"y":64,"z":0}}'
+```
+
+Crear un Player a 1 bloque y un Zombie con poca vida a 2 bloques:
+
+```bash
+curl --request POST --url http://localhost:8080/api/lp3/entidades \
+  --header 'Content-Type: application/json' \
+  --data '{"nombre":"Player","tipo":"PLAYER","vida":20,"danoBase":5,"velocidadMovimiento":1,
+    "hitbox":{"ancho":0.6,"alto":1.8,"profundidad":0.6},"sonidos":[],"drop":[],
+    "posicion":{"x":1,"y":64,"z":0}}'
+
+curl --request POST --url http://localhost:8080/api/lp3/entidades \
+  --header 'Content-Type: application/json' \
+  --data '{"nombre":"Zombie","tipo":"ZOMBIE","vida":5,"danoBase":5,"velocidadMovimiento":0.7,
+    "hitbox":{"ancho":0.6,"alto":1.95,"profundidad":0.6},"sonidos":[],"drop":[],
+    "posicion":{"x":2,"y":64,"z":0}}'
+```
+
+Explotar el Creeper (**reemplazar `1` por el ID devuelto al crearlo**):
+
+```bash
+curl --request POST \
+  --url http://localhost:8080/api/lp3/explosiones/simular \
+  --header 'Content-Type: application/json' \
+  --data '{"creeperId":1}'
+```
+
+Respuesta `200 OK`: el Creeper se borra; el Player pierde 13 de vida y queda con 7
+guardados en H2; el Zombie recibe hasta 7 de daño, pierde sus 5 puntos y se borra.
+`GET /api/lp3/entidades` refleja esos cambios. Un segundo intento con el mismo
+Creeper devuelve `404`, porque ya no existe. Los IDs eliminados no se reutilizan.
 
 ## Endpoints
 
