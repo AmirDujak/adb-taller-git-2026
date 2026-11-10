@@ -107,8 +107,11 @@ El cuerpo contiene `codigo` y `error`. Las hijas las lanzan objetos del dominio.
 ## Cómo probar en 5–10 minutos
 
 1. Arrancar y abrir Insomnia: **Import → File → `insomnia/minecraft.yaml`**.
+   Si estaba importada la versión manual, volver a importar y usar la colección
+   cuyo nombre termina en **IDs automáticos**.
 2. Revisar `base_url` en Base Environment y ejecutar la carpeta 01 en orden.
-   Copiar los IDs devueltos en las variables indicadas, sin asumir valores consecutivos.
+   Los scripts de cada POST válido guardan automáticamente sus IDs en el entorno;
+   no copiar valores ni asumir IDs consecutivos. Ejecutar secuencialmente una iteración.
 3. Comprobar POST 201 y Location, GET coincidente, PUT a vida 30 y GET con 30.
 4. Ejecutar POST con vida 0: 400. El listado posterior debe tener la misma cantidad
    que antes; DELETE 204 y GET posterior 404.
@@ -121,13 +124,19 @@ El cuerpo contiene `codigo` y `error`. Las hijas las lanzan objetos del dominio.
    comprobar vida **60**, demostrando el máximo cargado de 40.
 9. Carpeta 04: provocar ambas hijas; distinguir códigos y HTTP 400/409. El Player
    sigue en 7 y el Creeper sin posición permanece intacto tras el intento fallido.
-10. Para repetir las explosiones, crear nuevos Creepers y actualizar variables:
-    los IDs eliminados no se reutilizan. Usar datos de desarrollo, porque puede
+10. Para repetir las explosiones, volver a ejecutar la carpeta desde sus altas:
+    los nuevos IDs se capturan automáticamente y los eliminados no se reutilizan.
+    Los scripts rechazan respuestas distintas de 201 e IDs inválidos, dejando 0
+    en lugar de reutilizar IDs anteriores. Usar datos de desarrollo, porque puede
     afectar otros objetivos cercanos que ya estén en esa base.
 
 Pruebas automatizadas: `./mvnw test`; cubren CRUD, límites, herencia real al leer H2,
 protocolo, excepciones, compatibilidad de esquema antiguo, rollback y reinicio con
 archivo temporal. No tocan la base personal de `data/`.
+
+Pruebas específicas de la automatización (Node.js y Ruby):
+`node --test insomnia/tests/automatic-ids.test.cjs`. Comprueban los siete scripts
+del export, sin depender de IDs fijos ni cambiar la base de datos.
 
 ## Entrega en Classroom
 

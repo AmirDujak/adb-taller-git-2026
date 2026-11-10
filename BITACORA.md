@@ -362,3 +362,28 @@ en Insomnia que no se hayan realizado. El alumno debe revisar y poder defender e
   revisión del alumno. Se conserva el formato de exportación v5 utilizado previamente.
 - Publicación prevista mediante commits separados en la rama existente
   `feature/markdown`; sin reescribir el historial ni modificar `main`.
+
+## Entrada 9 — IDs automáticos en Insomnia
+
+**Fecha:** 2026-11-09. **Agente:** OpenCode. **Proveedor:** OpenAI.
+**Modelo exacto:** `openai/gpt-6.1-sol` (GPT-6.1 Sol).
+
+**Resumen de prompts:** el alumno compartió una corrida que creaba un Zombie con
+ID 10 pero consultaba/actualizaba/borraba ID 0, preguntó por qué la captura no era
+automática y luego indicó «Hazlo» para automatizar la colección y actualizar la entrega.
+
+- Se agregó un script previo y posterior a cada una de las siete altas válidas:
+  limpiar el ID anterior, verificar 201 e ID entero positivo y guardar el ID real
+  en el entorno. Los POST ilegales y las explosiones no sobrescriben IDs.
+- Se consultaron la documentación oficial de scripts de Kong y el importador
+  YAML v5 de Insomnia para confirmar `scripts.preRequest`, `scripts.afterResponse`
+  y `insomnia.environment.set`, sin inventar campos del export.
+- Se agregaron pruebas Node.js que ejecutan los scripts reales del YAML y se
+  actualizaron README y especificaciones para correr las carpetas sin copiar IDs.
+- No se modificó código Java ni se operó la interfaz gráfica de Insomnia del alumno.
+  Las pruebas HTTP usan una H2 temporal aislada, no su base en `data/`.
+- Verificación: 15 pruebas de scripts aprobadas; 59 pruebas Maven aprobadas;
+  dos recorridos completos (56 pedidos HTTP) ejecutando los scripts del YAML con
+  la API de entorno/respuesta emulada en Node.js, sin asignación manual de IDs.
+  Se verificaron reemplazo de IDs entre corridas y persistencia tras reiniciar.
+  Esto no sustituye la verificación visual de importación y corrida en Insomnia.

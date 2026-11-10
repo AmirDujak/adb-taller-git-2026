@@ -296,11 +296,15 @@ Se conservan las demos GET temporales (no son el CRUD ni guardan sus acciones):
 ## Importar y recorrer Insomnia
 
 1. En Insomnia, **Import → File**, seleccionar [`insomnia/minecraft.yaml`](insomnia/minecraft.yaml).
-2. Editar **Base Environment**: `base_url` es `http://localhost:8080`. Los IDs comienzan
-   en 0 deliberadamente: copiar cada ID real devuelto por los POST a la variable indicada.
+   Si ya se importó una versión anterior, volver a importar y usar la colección cuyo
+   nombre termina en **IDs automáticos**; editar el archivo no actualiza la copia anterior en Insomnia.
+2. Revisar **Base Environment**: `base_url` es `http://localhost:8080`. Los scripts
+   de los siete POST válidos capturan el ID y actualizan el entorno automáticamente;
+   **no hay que copiar IDs**. Los valores 0 son solo el estado inicial del export.
+   Usar el entorno base importado, sin sobrescribir los IDs en variables de carpeta.
 3. Recorrer **01 — Estado y CRUD** (pedidos 01–11): alta, lectura, PUT, POST ilegal,
    comprobación sin basura, DELETE y 404.
-4. Recorrer **02 — Explosión normal** (12–19): guardar los tres IDs, ejecutar movimientos,
+4. Recorrer **02 — Explosión normal** (12–19): crear las tres entidades, ejecutar movimientos,
    simular y comprobar Player en 7, Zombie y Creeper ausentes.
 5. Detener y arrancar de nuevo; repetir el GET 17: la vida debe seguir en 7.
 6. Recorrer **03 — Carga** (20–23): Creeper cargado y Player de 100 en la misma posición;
@@ -308,11 +312,33 @@ Se conservan las demos GET temporales (no son el CRUD ni guardan sus acciones):
 7. Recorrer **04 — Excepciones** (24–28): ver códigos diferentes 400/409, crear el Creeper
    sin posición y confirmar que los errores no dañaron los registros existentes.
 
-Ejecutar una vez cada simulación por Creeper; para repetir, crear otro y actualizar IDs.
+Se pueden ejecutar las carpetas completas con **Run**, en orden 01 → 02 → 03 → 04,
+una iteración y secuencialmente (no en paralelo). No detener la corrida por el solo
+hecho de recibir 400/404/409: varios pedidos buscan esos errores deliberadamente.
+Para comprobar el reinicio, después de la carpeta 02 reiniciar el servicio y enviar
+**solo el GET 17**, sin volver a crear las entidades.
+
+Cada alta limpia su variable antes de enviar el POST y solo guarda un ID entero
+positivo si recibe 201; de lo contrario el script informa un error y deja 0 para no
+reutilizar silenciosamente un ID antiguo. Los POST ilegales y las simulaciones no
+sobrescriben esas variables. Los scripts usan la API documentada de Insomnia:
+`insomnia.response.json()` e `insomnia.environment.set()`.
+
+Ejecutar una vez cada simulación por Creeper; para repetir, volver a ejecutar la
+carpeta del escenario desde sus altas: los IDs se reemplazan automáticamente.
 La colección es destructiva sobre las entidades del escenario y puede afectar otros
 objetivos cercanos: usar una base de desarrollo, no datos importantes. Las coordenadas
 de ambos escenarios están separadas. El export antiguo en la raíz se conserva como
 historial, pero **la colección de entrega es `insomnia/minecraft.yaml`**.
+
+Pruebas de los scripts (opcional, requiere Node.js y Ruby con sus bibliotecas estándar):
+
+```bash
+node --test insomnia/tests/automatic-ids.test.cjs
+```
+
+Se ejecutan los scripts reales del YAML con respuestas simuladas: captura de las
+siete variables, reemplazo de IDs anteriores y rechazo de respuestas/IDs inválidos.
 
 ## Entrega
 
