@@ -2,9 +2,12 @@ package py.edu.uc.lp3.domain;
 
 import java.util.List;
 
+@jakarta.persistence.Entity
+@jakarta.persistence.DiscriminatorValue("ZOMBIE")
 public class Zombie extends Hostiles {
 
-    private final boolean hostilidad;
+    @jakarta.persistence.Column(columnDefinition = "boolean default true")
+    private boolean hostilidad;
 
     /** Zombie por defecto: hostil, vida 20, daño base 5, velocidad 0.7 y rango de aggro 12.0. */
     public Zombie() {

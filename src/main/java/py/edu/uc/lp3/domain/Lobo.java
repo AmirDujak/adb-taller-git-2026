@@ -2,8 +2,11 @@ package py.edu.uc.lp3.domain;
 
 import java.util.List;
 
+@jakarta.persistence.Entity
+@jakarta.persistence.DiscriminatorValue("LOBO")
 public class Lobo extends NoHostiles {
 
+    @jakarta.persistence.Column(columnDefinition = "boolean default false")
     private boolean domesticado;
 
     public Lobo() {

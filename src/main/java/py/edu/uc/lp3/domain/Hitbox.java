@@ -5,15 +5,23 @@ package py.edu.uc.lp3.domain;
  * diagrama aparece como "-Hitbox // fisico").
  * Es inmutable: una vez creada no se puede deformar desde afuera.
  */
-public final class Hitbox {
+@jakarta.persistence.Embeddable
+public class Hitbox {
 
-    private final double ancho;
-    private final double alto;
-    private final double profundidad;
+    @jakarta.persistence.Column(nullable = false)
+    private double ancho;
+    @jakarta.persistence.Column(nullable = false)
+    private double alto;
+    @jakarta.persistence.Column(nullable = false)
+    private double profundidad;
+
+    protected Hitbox() {
+    }
 
     public Hitbox(double ancho, double alto, double profundidad) {
-        if (ancho <= 0 || alto <= 0 || profundidad <= 0) {
-            throw new IllegalArgumentException("Las dimensiones de la hitbox deben ser positivas");
+        if (!Double.isFinite(ancho) || !Double.isFinite(alto) || !Double.isFinite(profundidad)
+                || ancho <= 0 || alto <= 0 || profundidad <= 0) {
+            throw new py.edu.uc.lp3.exceptions.EstadoEntidadInvalidoException("Las dimensiones de la hitbox deben ser finitas y positivas");
         }
         this.ancho = ancho;
         this.alto = alto;

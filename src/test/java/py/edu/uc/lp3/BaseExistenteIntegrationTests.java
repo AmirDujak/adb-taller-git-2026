@@ -9,7 +9,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import py.edu.uc.lp3.domain.EntidadRegistro;
+import py.edu.uc.lp3.domain.Entidad;
 import py.edu.uc.lp3.domain.TipoEntidad;
 import py.edu.uc.lp3.repository.EntidadRepository;
 import py.edu.uc.lp3.rest.dto.EntidadDatos;
@@ -78,7 +78,7 @@ class BaseExistenteIntegrationTests {
         assertThat(repository.findById(2L).orElseThrow().getVida()).isEqualTo(7);
     }
 
-    private EntidadDatos datos(EntidadRegistro e, EntidadDatos.PosicionDatos posicion) {
+    private EntidadDatos datos(Entidad e, EntidadDatos.PosicionDatos posicion) {
         var hitbox = e.getHitbox();
         return new EntidadDatos(e.getNombre(), e.getVida(), e.getDanoBase(), e.getVelocidadMovimiento(),
                 new EntidadDatos.HitboxDatos(hitbox.getAncho(), hitbox.getAlto(), hitbox.getProfundidad()),

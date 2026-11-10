@@ -7,6 +7,9 @@ public enum TipoEntidad {
 
     /** Compatibilidad con los registros antiguos que solo guardaban el nombre. */
     public static TipoEntidad desdeNombre(String nombre) {
+        if (nombre == null) {
+            throw new py.edu.uc.lp3.exceptions.EstadoEntidadInvalidoException("El nombre es obligatorio");
+        }
         String normalizado = nombre.strip().toUpperCase(Locale.ROOT)
                 .replace('Ñ', 'N').replace(" ", "_");
         if (normalizado.equals("ZOMBIEPEQUENO")) {

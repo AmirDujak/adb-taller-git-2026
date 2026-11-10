@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import py.edu.uc.lp3.domain.Creeper;
-import py.edu.uc.lp3.domain.EntidadRegistro;
-import py.edu.uc.lp3.domain.TipoEntidad;
+import py.edu.uc.lp3.domain.Entidad;
+import py.edu.uc.lp3.exceptions.EstadoEntidadInvalidoException;
 import py.edu.uc.lp3.exceptions.EntidadNoEncontradaException;
 import py.edu.uc.lp3.repository.EntidadRepository;
 import py.edu.uc.lp3.rest.dto.ExplosionDatos;
@@ -29,24 +29,15 @@ public class ExplosionServiceImpl implements ExplosionService {
     @Transactional
     public ExplosionResultado simular(ExplosionDatos datos) {
         if (datos == null || datos.creeperId() == null || datos.creeperId() <= 0) {
-            throw new IllegalArgumentException("creeperId debe ser un identificador positivo");
+            throw new EstadoEntidadInvalidoException("creeperId debe ser un identificador positivo");
         }
-        List<EntidadRegistro> entidades = repository.buscarParaExplosion();
-        EntidadRegistro origen = entidades.stream()
+        List<Entidad> entidades = repository.buscarParaExplosion();
+        Entidad origen = entidades.stream()
                 .filter(e -> e.getId().equals(datos.creeperId())).findFirst()
                 .orElseThrow(() -> new EntidadNoEncontradaException(datos.creeperId()));
-        if (origen.getTipo() != TipoEntidad.CREEPER) {
-            throw new IllegalArgumentException("La entidad indicada no es un Creeper");
-        }
-        if (origen.getPosicion() == null) {
-            throw new IllegalArgumentException("El Creeper necesita una posición guardada para explotar");
-        }
-        Creeper creeper = new Creeper();
-        if (origen.isCargado()) {
-            creeper.cargarConRayo();
-        }
+        Creeper creeper = origen.prepararExplosion();
         List<EstadoObjetivo> objetivos = new ArrayList<>();
-        for (EntidadRegistro objetivo : entidades) {
+        for (Entidad objetivo : entidades) {
             if (objetivo.getId().equals(origen.getId()) || objetivo.getPosicion() == null) {
                 continue;
             }
@@ -55,7 +46,8 @@ public class ExplosionServiceImpl implements ExplosionService {
                 continue;
             }
             int vidaInicial = objetivo.getVida();
-            int dano = objetivo.recibirDanio(creeper.calcularDanioExplosion(distancia));
+            objetivo.recibirDanio(creeper.calcularDanioExplosion(distancia));
+            int dano = vidaInicial - objetivo.getVida();
             boolean eliminado = objetivo.getVida() == 0;
             objetivos.add(new EstadoObjetivo(objetivo.getId(), objetivo.getNombre(), distancia,
                     vidaInicial, dano, objetivo.getVida(), eliminado));

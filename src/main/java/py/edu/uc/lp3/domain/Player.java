@@ -2,6 +2,8 @@ package py.edu.uc.lp3.domain;
 
 import java.util.List;
 
+@jakarta.persistence.Entity
+@jakarta.persistence.DiscriminatorValue("PLAYER")
 public class Player extends Entidad {
 
     public Player() {

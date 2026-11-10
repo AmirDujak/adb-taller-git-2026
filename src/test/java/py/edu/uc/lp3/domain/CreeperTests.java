@@ -3,7 +3,7 @@ package py.edu.uc.lp3.domain;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CreeperTests {
 
@@ -42,7 +42,8 @@ class CreeperTests {
     void rechazaDistanciasInvalidas() {
         Creeper creeper = new Creeper();
         for (double distancia : new double[]{-1, Double.NaN, Double.POSITIVE_INFINITY}) {
-            assertThatIllegalArgumentException().isThrownBy(() -> creeper.calcularDanioExplosion(distancia));
+            assertThatThrownBy(() -> creeper.calcularDanioExplosion(distancia))
+                    .isInstanceOf(py.edu.uc.lp3.exceptions.EstadoEntidadInvalidoException.class);
         }
     }
 }

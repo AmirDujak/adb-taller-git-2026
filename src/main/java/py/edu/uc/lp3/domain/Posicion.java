@@ -19,7 +19,7 @@ public class Posicion {
 
     public Posicion(double x, double y, double z) {
         if (!Double.isFinite(x) || !Double.isFinite(y) || !Double.isFinite(z)) {
-            throw new IllegalArgumentException("Las coordenadas deben ser finitas");
+            throw new py.edu.uc.lp3.exceptions.EstadoEntidadInvalidoException("Las coordenadas deben ser finitas");
         }
         this.x = x;
         this.y = y;

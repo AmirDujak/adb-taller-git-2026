@@ -16,8 +16,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.context.WebApplicationContext;
 import py.edu.uc.lp3.constants.ApiPaths;
-import py.edu.uc.lp3.domain.EntidadRegistro;
-import py.edu.uc.lp3.domain.HitboxRegistro;
+import py.edu.uc.lp3.domain.Entidad;
+import py.edu.uc.lp3.domain.Hitbox;
 import py.edu.uc.lp3.domain.Posicion;
 import py.edu.uc.lp3.domain.TipoEntidad;
 import py.edu.uc.lp3.repository.EntidadRepository;
@@ -50,9 +50,9 @@ class ExplosionIntegrationTests {
         repository.deleteAll();
     }
 
-    private EntidadRegistro guardar(String nombre, int vida, boolean cargado, Posicion posicion) {
-        return repository.save(new EntidadRegistro(nombre, vida, 5, 0.7,
-                new HitboxRegistro(0.6, 1.8, 0.6), List.of("sonido"), List.of("drop"),
+    private Entidad guardar(String nombre, int vida, boolean cargado, Posicion posicion) {
+        return repository.save(Entidad.crear(nombre, vida, 5, 0.7,
+                new Hitbox(0.6, 1.8, 0.6), List.of("sonido"), List.of("drop"),
                 TipoEntidad.desdeNombre(nombre), cargado, posicion));
     }
 
@@ -129,7 +129,8 @@ class ExplosionIntegrationTests {
         var sinPosicion = guardar("Creeper", 20, false, null);
         for (Long id : List.of(noCreeper.getId(), sinPosicion.getId())) {
             mvc.perform(post(URL).contentType(MediaType.APPLICATION_JSON).content(cuerpo(id)))
-                    .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error").isNotEmpty());
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.codigo").value("EXPLOSION_NO_PERMITIDA"));
         }
         mvc.perform(post(URL).contentType(MediaType.APPLICATION_JSON).content(cuerpo(999999L)))
                 .andExpect(status().isNotFound());

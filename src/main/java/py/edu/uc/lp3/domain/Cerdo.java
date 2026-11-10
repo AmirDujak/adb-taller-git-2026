@@ -2,9 +2,12 @@ package py.edu.uc.lp3.domain;
 
 import java.util.List;
 
+@jakarta.persistence.Entity
+@jakarta.persistence.DiscriminatorValue("CERDO")
 public class Cerdo extends Entidad {
 
-    private final boolean montable;
+    @jakarta.persistence.Column(columnDefinition = "boolean default false")
+    private boolean montable;
 
     public Cerdo() {
         this(10, 2, 0.8, false);

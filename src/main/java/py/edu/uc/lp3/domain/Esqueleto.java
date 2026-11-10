@@ -2,9 +2,12 @@ package py.edu.uc.lp3.domain;
 
 import java.util.List;
 
+@jakarta.persistence.Entity
+@jakarta.persistence.DiscriminatorValue("ESQUELETO")
 public class Esqueleto extends Hostiles {
 
-    private final boolean usaArco;
+    @jakarta.persistence.Column(columnDefinition = "boolean default true")
+    private boolean usaArco;
 
     /** Esqueleto por defecto: usa arco, vida 20, daño base 3, velocidad 0.75 y rango de aggro 14.0. */
     public Esqueleto() {
@@ -44,7 +47,7 @@ public class Esqueleto extends Hostiles {
      */
     public String disparar(int distancia) {
         if (distancia < 0) {
-            throw new IllegalArgumentException("La distancia no puede ser negativa");
+            throw new py.edu.uc.lp3.exceptions.EstadoEntidadInvalidoException("La distancia no puede ser negativa");
         }
         if (!isViva()) {
             return getNombre() + " ya desapareció.";
