@@ -1,446 +1,325 @@
-# Taller Git 2026 — Minecraft (opción A)
+# Taller Git 2026 — Minecraft · POO-08
 
-API REST de entidades de Minecraft desarrollada para Lenguaje de Programación 3.
-Expone el modelado de entidades del juego con herencia, polimorfismo, encapsulamiento,
-sobrecarga y sobrescritura de métodos.
+**Alumno:** Amir Dujak · Trabajo individual · [Repositorio](https://github.com/AmirDujak/adb-taller-git-2026)
 
-## Cómo ejecutar
+API REST con Spring Boot, Java 21, Spring Data JPA y H2. Persiste la jerarquía real
+de `Entidad`, permite CRUD y aplica explosiones sobre `Creeper`, `Player` y `Zombie`.
+No usa una lista en el controller ni una copia paralela del dominio para guardar vidas.
+
+## Arranque y pruebas
+
+Requisitos: JDK 21, conexión para descargar dependencias en el primer arranque y puerto 8080 libre.
+Se conserva Spring Boot **4.1.1** del proyecto original.
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-La aplicación queda disponible en `http://localhost:8080`.
-
-## Estructura del proyecto
-
-Organizado siguiendo el [template de LP3](https://github.com/alefq/lp3-template-tp),
-adaptado al dominio de Minecraft:
-
-```text
-src/main/java/py/edu/uc/lp3/
-├── Application.java          # Punto de entrada de Spring Boot
-├── constants/ApiPaths.java  # Rutas de la API
-├── domain/                  # Jerarquía del juego y modelos persistentes JPA
-├── exceptions/              # Excepciones de negocio
-├── repository/              # Acceso a datos con Spring Data JPA
-├── rest/
-│   ├── controller/          # Presentación HTTP
-│   └── dto/                 # Datos de entrada del CRUD
-└── service/
-    ├── EntidadService.java  # Contrato de negocio
-    └── impl/                # Implementación y validaciones
-```
-
-Se mantienen **Java 21 y Spring Boot 4.1.1** del proyecto original. Del template
-se adopta la organización, no sus versiones antiguas de Java y Spring Boot ni sus
-clases de ejemplo de otro dominio. Se usa `jakarta.persistence`, no `javax.persistence`.
-La inyección de dependencias se realiza por constructor.
-
-## CRUD persistente de Entidad (3 capas)
-
-El CRUD usa `/api/lp3/entidades`, separado de los ejemplos de comportamiento del juego.
-La ruta anterior `/api/entidades` sigue disponible como alias para todas las operaciones.
-La cabecera `Location` de las altas siempre apunta a la ruta principal `/api/lp3/entidades/{id}`.
-
-```text
-HTTP → EntidadCrudController → EntidadService (interfaz)
-                                  ↓
-                             EntidadServiceImpl → EntidadRepository → H2
-                                  negocios           persistencia
-```
-
-`EntidadRegistro` es el modelo JPA de los atributos comunes de `py.edu.uc.lp3.domain.Entidad`:
-nombre, vida, daño base, velocidad, hitbox, sonidos y drop. También guarda el tipo,
-la carga del Creeper y la posición para las explosiones persistentes.
-La jerarquía abstracta del juego se conserva; las demostraciones GET siguen siendo temporales.
-
-| Método | Ruta | Resultado |
-|---|---|---|
-| POST | `/api/lp3/entidades` | Crear: `201 Created`, cuerpo y cabecera `Location` |
-| GET | `/api/lp3/entidades` | Listar registros: `200 OK` (inicialmente `[]`) |
-| GET | `/api/lp3/entidades/{id}` | Buscar: `200 OK` o `404 Not Found` |
-| PUT | `/api/lp3/entidades/{id}` | Reemplazar todos los datos: `200 OK` o `404 Not Found` |
-| DELETE | `/api/lp3/entidades/{id}` | Eliminar: `204 No Content` o `404 Not Found` |
-
-Ejemplo de alta (el mismo cuerpo sirve para PUT):
-
-```bash
-curl -i -X POST http://localhost:8080/api/lp3/entidades \
-  -H 'Content-Type: application/json' \
-  -d '{"nombre":"Zombie","vida":20,"danoBase":5,"velocidadMovimiento":0.7,"hitbox":{"ancho":0.6,"alto":1.95,"profundidad":0.6},"sonidos":["gruñido","gemido"],"drop":["carne_podrida"]}'
-
-curl http://localhost:8080/api/lp3/entidades
-curl http://localhost:8080/api/lp3/entidades/1
-curl -i -X DELETE http://localhost:8080/api/lp3/entidades/1
-```
-
-Todos los campos del ejemplo son obligatorios; `sonidos` y `drop` pueden ser listas
-vacías. El id lo genera la base y se toma de la ruta para actualizar o eliminar.
-El service valida nombre no vacío (hasta 255 caracteres), vida positiva, daño no
-negativo, velocidad finita no negativa y dimensiones finitas positivas. También
-rechaza elementos nulos, vacíos o de más de 255 caracteres en las listas.
-Las violaciones devuelven `400 Bad Request` con `{"error":"mensaje"}`.
-
-Campos adicionales de POST y PUT:
-
-```json
-{
-  "tipo": "CREEPER",
-  "cargado": false,
-  "posicion": {"x": 0, "y": 64, "z": 0}
-}
-```
-
-Se agregan al cuerpo completo anterior, no lo reemplazan. Tipos: `CREEPER`, `PLAYER`,
-`ZOMBIE`, `ESQUELETO`, `LOBO`, `OVEJA`, `ALDEANO`, `CERDO`, `ZOMBIE_PEQUENO`, `OTRA`.
-Solo un Creeper puede tener `cargado: true`. Las coordenadas deben ser finitas y completas.
-En altas, si se omite el tipo se deduce del nombre exacto conocido (si no, `OTRA`),
-la carga es falsa y la posición queda sin definir. En PUT, omitir estos campos nuevos
-o enviarlos como `null` conserva sus valores anteriores, para mantener los clientes existentes.
-
-### Base H2
-
-Los datos se guardan en archivo en `./data/entidades` y sobreviven a los reinicios.
-Spring Data JPA implementa el repositorio y Hibernate actualiza el esquema al iniciar.
-La carpeta `data/` está excluida de Git.
-
-Al reiniciar, `ddl-auto=update` agrega las columnas de tipo, carga y posición sin borrar
-las entidades ni cambiar sus IDs. Las filas antiguas conservan su vida; el tipo se deduce
-de su nombre cuando aún no fue guardado explícitamente. **No se les inventa una posición**:
-hay que asignarla mediante PUT para que participen en las explosiones.
-Antes de actualizar el servicio, es recomendable respaldar `data/` con el servicio detenido.
-
-Con la aplicación ejecutándose, abrir `http://localhost:8080/h2-console`:
-
-- JDBC URL: `jdbc:h2:file:./data/entidades`
-- Usuario: `sa`
-- Contraseña: vacía
-
-Esta configuración es para desarrollo local. Las pruebas usan otra H2 **en memoria**
-para no modificar la base local:
+Servicio: `http://localhost:8080`. `GET /` confirma que está vivo. Detener con Ctrl+C.
 
 ```bash
 ./mvnw test
 ```
 
-## Explosiones persistentes (regla de negocio)
+Las pruebas habituales usan H2 en memoria. Otra prueba abre, cierra y vuelve a abrir
+una H2 **en archivo temporal** para verificar que las vidas y los subtipos sobreviven
+al reinicio. Ninguna prueba usa ni borra `./data/entidades`.
+
+## Paquetes y capas
+
+Se sigue la organización del [template LP3](https://github.com/alefq/lp3-template-tp),
+no sus versiones antiguas de dependencias; se usa `jakarta.persistence`.
 
 ```text
+py.edu.uc.lp3
+├── Application.java
+├── constants/       rutas
+├── domain/          Entidad, Creeper, Player, Zombie, Movimientos, Hitbox, Posicion…
+├── exceptions/      familia de errores del juego
+├── repository/      EntidadRepository (interfaz Spring Data)
+├── rest/controller/ CRUD, explosiones, demos y advice HTTP
+├── rest/dto/        datos JSON de entrada y resultado de explosión
+└── service/impl/    coordinación transaccional y acceso al repositorio
+```
+
+El controller depende del contrato `EntidadService`/`ExplosionService`; la implementación
+recibe `EntidadRepository` por constructor. Las reglas numéricas viven en el dominio.
+El service coordina consultas, mensajes del juego y guardado dentro de una transacción.
+
+## H2: propiedades y consola
+
+Configuración en `src/main/resources/application.properties`:
+
+| Propiedad | Qué hace |
+|---|---|
+| `spring.application.name=adb-taller-git-2026` | Identifica la aplicación en Spring. |
+| `spring.datasource.url=jdbc:h2:file:./data/entidades` | Abre una H2 en archivo relativo a la raíz desde la que se ejecuta Maven; conserva datos entre arranques. |
+| `spring.datasource.username=sa` | Usuario local de la base. |
+| `spring.datasource.password=` | Contraseña vacía solo para desarrollo. |
+| `spring.jpa.hibernate.ddl-auto=update` | Crea el esquema faltante y lo actualiza sin recrearlo en cada arranque; no reemplaza migraciones de producción. |
+| `spring.jpa.open-in-view=false` | Evita consultas fuera del service; las listas necesarias se inicializan dentro de la transacción. |
+| `spring.h2.console.enabled=true` | Habilita la consola de desarrollo; no se debe exponer en producción. |
+| `spring.h2.console.path=/h2-console` | Publica la consola en esa ruta. |
+
+Con el servicio activo, abrir `http://localhost:8080/h2-console`, usar la misma URL JDBC,
+usuario `sa` y contraseña vacía. Para ver el estado:
+
+```sql
+SELECT id, nombre, tipo, vida, cargado, posicion_x, posicion_y, posicion_z
+FROM entidades ORDER BY id;
+```
+
+También existen `entidad_sonidos` y `entidad_drops`: son colecciones de valores, no
+clases hijas del modelo. `data/` y `target/` están fuera de Git.
+
+### Compatibilidad con la base anterior
+
+Se conservan tabla, IDs, vidas, sonidos, drops y posiciones existentes. Antes de
+actualizar, respaldar `data/` con el servicio detenido. **No hay que borrar la base.**
+Hibernate agrega las columnas que faltan. `@DiscriminatorFormula` toma `tipo` cuando
+existe; para filas antiguas con tipo nulo usa el nombre conocido, o `OTRA`.
+Así, incluso una fila anterior de Creeper se hidrata como `Creeper`, no como un DTO.
+Una actualización guarda su tipo explícito. No se inventan posiciones: asignarlas con PUT.
+Las nuevas propiedades específicas que antes no se guardaban tienen valores iniciales
+de desarrollo (por ejemplo, hostilidad y arco verdaderos, profesión Granjero, aggro 16).
+La prueba `BaseExistenteIntegrationTests` verifica la actualización del esquema antiguo.
+
+## URLs y contrato REST
+
+| Método | URL | Resultado |
+|---|---|---|
+| GET | `/` | 200, servicio vivo |
+| POST | `/api/lp3/entidades` | 201, recurso con ID y cabecera `Location` |
+| GET | `/api/lp3/entidades` | 200, colección persistida; inicialmente `[]` |
+| GET | `/api/lp3/entidades/{id}` | 200 o 404 |
+| PUT | `/api/lp3/entidades/{id}` | 200, actualización persistida, o 400/404 |
+| DELETE | `/api/lp3/entidades/{id}` | 204 sin cuerpo, o 404 |
+| GET | `/api/lp3/entidades/movimientos` | 200, mensajes de la interfaz `Movimientos` |
+| POST | `/api/lp3/explosiones/simular` | 200 con resultado persistido, o 400/404/409 |
+
+`/api/entidades` sigue siendo alias del CRUD y de movimientos; `Location` usa la ruta principal.
+
+Ejemplo de POST; copiar el ID de la respuesta, no asumir que será 1:
+
+```bash
+curl -i http://localhost:8080/api/lp3/entidades \
+  -H 'Content-Type: application/json' \
+  -d '{"nombre":"Mi Creeper","tipo":"CREEPER","cargado":false,"vida":20,
+       "danoBase":0,"velocidadMovimiento":0.8,
+       "hitbox":{"ancho":0.6,"alto":1.7,"profundidad":0.6},
+       "sonidos":["siseo"],"drop":["polvora"],"posicion":{"x":0,"y":64,"z":0}}'
+```
+
+### Invariantes y actualización
+
+- Nombre no vacío de hasta 255 caracteres, vida inicial positiva, daño base no negativo.
+- Velocidad finita no negativa; hitbox con tres dimensiones finitas positivas.
+- Sonidos y drops obligatorios, aunque pueden ser `[]`; sus textos no pueden ser nulos,
+  vacíos ni superar 255 caracteres. Los getters devuelven copias no modificables.
+- Posición opcional; si se envía, requiere las tres coordenadas finitas.
+- Solo un Creeper puede estar cargado. El subtipo no se cambia por PUT.
+- La vida solo baja mediante `recibirDanio`, nunca queda negativa y una entidad muerta no se mueve.
+- No hay setters públicos. Constructores/fábrica, actualización y callbacks JPA validan;
+  el esquema nuevo también tiene restricciones numéricas `CHECK`.
+
+En POST son obligatorios los campos comunes del ejemplo; `tipo` puede omitirse por
+compatibilidad: se deduce del nombre conocido o queda `OTRA`. La carga predeterminada
+es falsa y la posición queda ausente. Es preferible enviar siempre `tipo`.
+
+PUT reemplaza todos los campos comunes y exige su presencia. **Excepción de compatibilidad:**
+`tipo`, `cargado` y `posicion` omitidos o nulos conservan el valor anterior. No permite
+borrar una posición mediante null ni transformar un Zombie en Creeper. No hay PATCH.
+Los atributos específicos de las demos que no figuran en `EntidadDatos` no se editan por este CRUD.
+
+## Dos reglas del juego y simulación
+
+1. **Onda expansiva:** `Creeper.calcularDanioExplosion` reduce la vida de `Player`, `Zombie` y otras entidades según su distancia tridimensional, sin daño desde el borde de 3 bloques.
+2. **Carga eléctrica:** un `Creeper` cargado duplica el daño de esa misma onda; al consumirse la explosión desaparece el origen y se eliminan los objetivos cuya vida llega a cero.
+
+Son reglas propias del práctico, no una réplica exacta del juego: el máximo normal es
+20, cargado 40; para `distancia < 3`, daño = `round(maximo * (1 - distancia / 3))`.
+`Entidad.recibirDanio` limita la pérdida a la vida disponible. No hay explosiones en cadena.
+Se omiten objetivos sin posición o fuera del radio; los del borde reciben cero.
+
+Crear primero un Creeper en `(0,64,0)`, un Player de vida 20 en `(1,64,0)` y un Zombie
+de vida 5 en `(2,64,0)`. Enviar el ID real del Creeper:
+
+```http
 POST /api/lp3/explosiones/simular
-HTTP → ExplosionController → ExplosionService → ExplosionServiceImpl → EntidadRepository → H2
-                                                  ↓
-                                   Creeper + EntidadRegistro + Posicion
+Content-Type: application/json
+
+{"creeperId": 123}
 ```
 
-**Esta operación modifica la base de datos**, aunque la ruta conserve el nombre `simular`.
-El cuerpo ahora recibe solamente `creeperId`: ya no se envían vidas ni distancias.
-El servicio consulta el Creeper y las entidades guardadas; `Posicion` calcula la distancia
-euclidiana tridimensional entre sus coordenadas. `Creeper` define el daño por distancia
-y carga, y `EntidadRegistro` descuenta la vida de cada objetivo sin dejarla negativa.
-Puede afectar a cualquier tipo de entidad, no solo a Player y Zombie.
+El Player pierde 13 y queda en **7**; el Zombie pierde sus 5 y se elimina; el Creeper
+también se elimina. GET muestra esos resultados en H2. Un segundo POST con el mismo
+Creeper devuelve 404. En el escenario cargado de Insomnia, un Player de vida 100 situado
+en el origen queda en **60**. La respuesta informa radio, origen consumido y objetivos
+con distancia, vida inicial, daño real, vida final y si fueron eliminados.
 
-Reglas propias de esta simulación (no una reproducción exacta de Minecraft):
+La operación bloquea las filas en orden de ID y es transaccional: daño y bajas se
+confirman juntos o se revierten juntos. El nombre histórico `simular` **no significa
+vista previa**: el POST modifica H2. No se guarda un historial adicional de explosiones;
+lo persistido es el estado resultante del mundo.
 
-- Radio de 3 bloques y daño máximo de 20 (40 si el Creeper está cargado).
-- Daño = `round(maximo * (1 - distancia / 3))` para distancias menores a 3.
-- En el borde del radio y fuera de él, el daño es cero.
-- La vida de los supervivientes se actualiza en H2.
-- Las entidades que quedan con vida 0 se **eliminan**, junto con sus sonidos y drops.
-- El Creeper que explota también se **elimina**, aunque no haya objetivos cerca.
-- Otros Creepers alcanzados reciben daño normal, sin explosiones en cadena.
-- `danoRecibido` indica la vida realmente perdida, limitada a la vida inicial.
-- La respuesta incluye `radio`, `creeper` y una lista `objetivos` con distancia,
-  vida inicial, daño recibido, vida final e indicador `eliminado`.
-- Solo se incluyen los objetivos con posición y distancia menor o igual al radio.
-  Las entidades sin posición o fuera del radio no se modifican.
-- ID inexistente: `404`. ID inválido, origen que no es Creeper o sin posición: `400`.
-- La operación completa es transaccional: si falla, no se guarda ningún cambio parcial.
-  Las explosiones bloquean las filas durante la operación para no repetir el estado inicial.
+## Excepciones y respuestas
 
-### Ejemplo para Insomnia
+`JuegoException extends RuntimeException` es la base no comprobada; el advice tiene
+un handler por tipo. Las hijas las lanza el dominio, no el controller.
 
-Crear un Creeper en `(0,64,0)`:
+| Tipo | HTTP | `codigo` | Ejemplo |
+|---|---|---|---|
+| `EstadoEntidadInvalidoException` | 400 | `ESTADO_ENTIDAD_INVALIDO` | Vida inicial 0 o Player cargado |
+| `ExplosionNoPermitidaException` | 409 | `EXPLOSION_NO_PERMITIDA` | Player como origen o Creeper sin posición |
+| `JuegoException` | 422 | `REGLA_JUEGO` | Respaldo para otras reglas; no se inventa un endpoint para forzar la base |
+| `EntidadNoEncontradaException` | 404 | `ENTIDAD_NO_ENCONTRADA` | ID ausente, distinto de una regla incumplida |
+| Cuerpo JSON ilegible | 400 | `JSON_INVALIDO` | Tipo desconocido, JSON roto o cuerpo ausente |
 
-```bash
-curl --request POST --url http://localhost:8080/api/lp3/entidades \
-  --header 'Content-Type: application/json' \
-  --data '{"nombre":"Creeper","tipo":"CREEPER","cargado":false,"vida":20,
-    "danoBase":0,"velocidadMovimiento":0.8,
-    "hitbox":{"ancho":0.6,"alto":1.7,"profundidad":0.6},
-    "sonidos":["siseo"],"drop":["polvora"],"posicion":{"x":0,"y":64,"z":0}}'
+```json
+{"codigo":"EXPLOSION_NO_PERMITIDA","error":"La entidad indicada no es un Creeper"}
 ```
 
-Crear un Player a 1 bloque y un Zombie con poca vida a 2 bloques:
+409 indica conflicto con el estado/tipo actual del objeto, no un fallo del servidor.
+Las excepciones no comprobadas evitan obligar a todas las capas a declarar `throws`
+y Spring revierte por defecto la transacción ante ellas. Una excepción comprobada
+obligaría a capturarla/declararla y requeriría revisar la configuración de rollback.
 
-```bash
-curl --request POST --url http://localhost:8080/api/lp3/entidades \
-  --header 'Content-Type: application/json' \
-  --data '{"nombre":"Player","tipo":"PLAYER","vida":20,"danoBase":5,"velocidadMovimiento":1,
-    "hitbox":{"ancho":0.6,"alto":1.8,"profundidad":0.6},"sonidos":[],"drop":[],
-    "posicion":{"x":1,"y":64,"z":0}}'
+## Qué hay que pensar — respuestas del modelo
 
-curl --request POST --url http://localhost:8080/api/lp3/entidades \
-  --header 'Content-Type: application/json' \
-  --data '{"nombre":"Zombie","tipo":"ZOMBIE","vida":5,"danoBase":5,"velocidadMovimiento":0.7,
-    "hitbox":{"ancho":0.6,"alto":1.95,"profundidad":0.6},"sonidos":[],"drop":[],
-    "posicion":{"x":2,"y":64,"z":0}}'
-```
+1. **Recurso y verbo:** el sustantivo es `entidades`; la URL identifica la colección/ítem y el verbo expresa CRUD. La ruta histórica de simulación representa la operación sobre explosiones.
+2. **Identidad:** `Long id` es clave generada por H2 con `IDENTITY`; el JSON de creación la omite y las actualizaciones toman el ID de la URL.
+3. **Herencia y tablas:** elegí `SINGLE_TABLE` porque los mobs comparten casi todos los atributos y la explosión consulta toda la familia; evita joins por objetivo, a cambio de columnas específicas anulables. La fórmula de Hibernate mantiene compatibilidad con tipos antiguos nulos.
+4. **Subtipo JSON:** Jackson lee `tipo` en `EntidadDatos` y lo escribe mediante `getTipo`; una fábrica explícita construye el subtipo real. No uso nombres Java arbitrarios ni tipado global de Jackson: el enum limita las clases admitidas.
+5. **Interfaz y repositorio:** Spring Data implementa `EntidadRepository`; el service depende de ese contrato y el controller del contrato del service, no de SQL ni de una implementación H2. Como en POO-07, el cliente conoce mensajes, no cómo se cumplen.
+6. **Protocolo del dominio:** `GET /api/lp3/entidades/movimientos` usa variables `Movimientos` y llama `avanzar` y `saltar` sobre Player, hostiles y no hostiles; no necesita distinguir clases y no cambia posiciones ni vidas.
+7. **Ocultamiento:** `Entidad`, `Hitbox` y `Posicion` sostienen invariantes. En Insomnia, pedidos 03/06 → 07 → 08 muestran que el POST ilegal no agrega filas. Los callbacks JPA vuelven a validar antes de escribir.
+8. **PUT/PATCH:** PUT exige los campos comunes; solo las tres extensiones opcionales conservan lo anterior si se omiten. Esta compatibilidad está documentada y probada. PATCH no está implementado.
+9. **DELETE:** retirar del mundo llama `retirarDelMundo` y elimina físicamente el registro y sus colecciones; devuelve 204. No representa daño ni entrega inventario a otro jugador.
+10. **Dos reglas:** la onda aplica daño a varios objetivos; la carga duplica esas pérdidas. La explosión consume el Creeper, elimina muertos y persiste supervivientes; GET muestra el resultado.
+11. **Excepciones:** construcción ilegal y explosión imposible son hijas distintas de `JuegoException`; un ID inexistente usa otro tipo y 404. El JSON ofrece `codigo` estable y `error` legible.
+12. **Cambiar H2:** cambiarían driver, URL, credenciales y migraciones; hay que revisar los defaults SQL y la compatibilidad de la fórmula. Controller, reglas, DTO y contrato del repositorio no deberían cambiar.
 
-Explotar el Creeper (**reemplazar `1` por el ID devuelto al crearlo**):
-
-```bash
-curl --request POST \
-  --url http://localhost:8080/api/lp3/explosiones/simular \
-  --header 'Content-Type: application/json' \
-  --data '{"creeperId":1}'
-```
-
-Respuesta `200 OK`: el Creeper se borra; el Player pierde 13 de vida y queda con 7
-guardados en H2; el Zombie recibe hasta 7 de daño, pierde sus 5 puntos y se borra.
-`GET /api/lp3/entidades` refleja esos cambios. Un segundo intento con el mismo
-Creeper devuelve `404`, porque ya no existe. Los IDs eliminados no se reutilizan.
-
-## Endpoints
-
-### Estado del servicio
-
-```text
-GET /
-```
-
-Devuelve un mensaje de bienvenida indicando que el servicio está funcionando.
-
-### Construcción de una entidad por tipo
-
-```text
-GET /entidad/{tipo}?profesion=Herrero&danio=25
-```
-
-Crea una entidad (`creeper`, `zombie`, `esqueleto`, `lobo`, `oveja`, `aldeano`) con sus
-valores por defecto y opcionalmente le aplica daño. Devuelve sus datos en JSON.
-
-### Construcción de un zombie con parámetros
-
-```text
-GET /entidades/zombie?vida=20&danoBase=5&velocidad=0.7&hostilidad=true
-```
-
-Construye un `Zombie` usando los parámetros recibidos por URL y devuelve sus datos en JSON.
-Los valores se validan en las entidades del dominio (vida > 0, daño base ≥ 0, velocidad ≥ 0).
-
-### Disparo del esqueleto (sobrecarga)
-
-```text
-GET /entidades/esqueleto/disparar?vida=20&danoBase=3&velocidad=0.75&usaArco=true
-GET /entidades/esqueleto/disparar?vida=20&danoBase=3&velocidad=0.75&usaArco=true&distancia=10
-```
-
-Sin `distancia` se invoca `disparar()`; con `distancia` se invoca `disparar(int)`.
-La segunda valida que la distancia no sea negativa.
-
-### Comportamientos polimórficos
-
-```text
-GET /entidades/comportamientos?vida=20&danoBase=5&velocidad=0.7&hostilidad=true&comercializacion=false
-```
-
-Construye un `Zombie` y un `Aldeano` con los parámetros de la URL y devuelve en JSON el
-comportamiento de cada uno. El controller los guarda en una `List<Entidad>` y llama a
-`comportamiento()` sin distinguir el tipo concreto; cada clase responde a su manera.
-Un valor inválido devuelve `400` (ver "Errores de validación").
-
-### Todas las entidades
-
-```text
-GET /entidades
-```
-
-Devuelve una lista con una instancia de cada tipo de entidad, mostrando su comportamiento.
-
-### Errores de validación
-
-Si un valor viola una regla del dominio (por ejemplo `vida=0` o `danoBase=-1`), la entidad
-lanza `IllegalArgumentException` y el controller responde `400 Bad Request` con
-`{"error": "<mensaje>"}`.
-
-## Entidades y comportamientos
-
-`Entidad` es la clase abstracta base. Contiene los atributos privados `vida`, `nombre`,
-`sonidos`, `hitbox`, `velocidadMovimiento`, `drop` y `danoBase`, valida sus valores en el
-constructor y declara el método abstracto `comportamiento()`. No existen setters públicos;
-el estado permanece encapsulado.
-
-- `Player`: explora el mundo y combate a las entidades.
-- `Zombie`: persigue y ataca al jugador si es hostil; de lo contrario, deambula sin atacar.
-- `Esqueleto`: ataca con arco o cuerpo a cuerpo según su configuración (`usaArco`).
-- `Creeper`: explota al atacar (y puede cargarse con un rayo).
-- `Lobo`: se puede domesticar con huesos.
-- `Oveja`: se puede esquilar para obtener lana.
-- `Aldeano`: comercia con el jugador según su profesión.
-- `Cerdo`: puede ser montado si tiene esa capacidad habilitada (`montable`).
-- `ZombiePequeño`: hereda el comportamiento del `Zombie` y agrega una velocidad aumentada.
-
-`Hostiles` y `NoHostiles` son clases intermedias abstractas que agregan, respectivamente,
-el rango de aggro y el contrato de interacción.
-
-## Sobrecarga y sobreescritura
-
-**Sobreescritura (`override`)**: `Entidad` declara `comportamiento()` como abstracto y
-`Player`, `Zombie`, `Creeper`, `Esqueleto`, `Lobo`, `Oveja`, `Aldeano` y `Cerdo` lo
-reimplementan con `@Override`, con la misma firma. Java elige la versión según la clase
-real del objeto, en tiempo de ejecución.
-
-**Sobrecarga (`overload`)**: `Esqueleto` define dos métodos llamados `disparar` con distinta
-lista de argumentos: `disparar()` y `disparar(int distancia)`. El compilador elige la
-versión según los argumentos de la llamada. La segunda valida que la distancia no sea negativa.
-Los constructores de cada clase también están sobrecargados (sin parámetros y con parámetros).
-
-**Cómo distinguirlas**: la sobreescritura mantiene la firma y cambia la clase (padre → hija);
-la sobrecarga mantiene el nombre y cambia los parámetros dentro de la misma clase.
-
-## Diagrama de clases
+## Diagrama Mermaid
 
 ```mermaid
 classDiagram
     direction TB
-
     class Movimientos {
         <<interface>>
         +avanzar() String
-        +rotar(angulo) String
         +saltar() String
+        +rotar(angulo) String
     }
-
-    class Hitbox {
-        -double ancho
-        -double alto
-        -double profundidad
-    }
-
     class Entidad {
         <<abstract>>
+        -Long id
         -int vida
-        -String nombre
-        -List~String~ sonidos
-        -Hitbox hitbox
-        -double velocidadMovimiento
-        -List~String~ drop
-        -int danoBase
-        #Entidad()
-        #Entidad(int vida, int danoBase, double velocidad)
-        +int getVida()
-        +int getDanoBase()
-        +double getVelocidadMovimiento()
-        +String comportamiento()*
-        +String recibirDanio(cantidad) String
-        +boolean isViva() boolean
+        -TipoEntidad tipo
+        -Posicion posicion
+        +comportamiento() String
+        +recibirDanio(cantidad) String
+        +prepararExplosion() Creeper
     }
-
-    class Player {
-        +Player()
-        +Player(int vida, int danoBase, double velocidad)
-        +String comportamiento()
-    }
-
     class Hostiles {
         <<abstract>>
-        -double rangoDeAggro
-        #Hostiles(...)
-        +boolean detecta(distancia) boolean
-        +String comportamiento()
-        #String accionDeAtaque()*
+        +comportamiento() String
     }
-
-    class NoHostiles {
-        <<abstract>>
-        #NoHostiles(...)
-        +String comportamiento()
-        #String interactuar()*
-    }
-
-    class Zombie {
-        -boolean hostilidad
-        +Zombie()
-        +Zombie(int vida, int danoBase, double velocidad, boolean hostilidad)
-        +boolean isHostilidad()
-        +String comportamiento()
-    }
-
-    class Esqueleto {
-        -boolean usaArco
-        +Esqueleto()
-        +Esqueleto(int vida, int danoBase, double velocidad, boolean usaArco)
-        +boolean isUsaArco()
-        +String disparar()
-        +String disparar(int distancia)
-    }
-
     class Creeper {
-        -boolean cargado
-        +Creeper()
-        +void cargarConRayo()
+        -Boolean cargado
+        +cargarConRayo()
+        +calcularDanioExplosion(distancia) int
+        +prepararExplosion() Creeper
     }
-
-    class Lobo {
-        -boolean domesticado
-        +Lobo()
-        +boolean isDomesticado()
+    class Player {
+        +comportamiento() String
     }
-
-    class Oveja {
-        -boolean esquilada
-        +Oveja()
-        +boolean isEsquilada()
+    class Zombie {
+        +comportamiento() String
     }
-
-    class Aldeano {
-        -String profesion
-        +Aldeano(String profesion)
-        +String getProfesion()
+    class EntidadRepository {
+        <<interface>>
+        +findAll() List
+        +save(entidad) Entidad
+        +buscarParaExplosion() List
     }
-
-    class Cerdo {
-        -boolean montable
-        +Cerdo()
-        +Cerdo(int vida, int danoBase, double velocidad, boolean montable)
-        +boolean isMontable()
-    }
-
-    class ZombiePequeño {
-        -int velocidadAumentada
-        +ZombiePequeño()
-        +ZombiePequeño(int vida, int danoBase, double velocidad, boolean hostilidad, int velocidadAumentada)
-        +int getVelocidadAumentada()
-    }
-
+    class JuegoException
+    class EstadoEntidadInvalidoException
+    class ExplosionNoPermitidaException
+    class EntidadNoEncontradaException
     Movimientos <|.. Entidad
-    Entidad *-- Hitbox
     Entidad <|-- Hostiles
-    Entidad <|-- NoHostiles
     Entidad <|-- Player
-    Entidad <|-- Cerdo
     Hostiles <|-- Creeper
     Hostiles <|-- Zombie
-    Hostiles <|-- Esqueleto
-    NoHostiles <|-- Lobo
-    NoHostiles <|-- Oveja
-    NoHostiles <|-- Aldeano
-    Zombie <|-- ZombiePequeño
+    Entidad *-- Hitbox
+    Entidad *-- Posicion
+    EntidadCrudController --> EntidadService
+    EntidadCrudController ..> Movimientos
+    EntidadServiceImpl ..|> EntidadService
+    EntidadServiceImpl --> EntidadRepository
+    ExplosionController --> ExplosionService
+    ExplosionServiceImpl ..|> ExplosionService
+    ExplosionServiceImpl --> EntidadRepository
+    ExplosionServiceImpl --> Creeper
+    EntidadRepository --> Entidad : persiste SINGLE_TABLE
+    JuegoException <|-- EstadoEntidadInvalidoException
+    JuegoException <|-- ExplosionNoPermitidaException
+    Entidad ..> EstadoEntidadInvalidoException : lanza
+    Creeper ..> ExplosionNoPermitidaException : lanza
+    JuegoExceptionHandler ..> JuegoException : handler base
+    JuegoExceptionHandler ..> EstadoEntidadInvalidoException : handler 400
+    JuegoExceptionHandler ..> ExplosionNoPermitidaException : handler 409
+    JuegoExceptionHandler ..> EntidadNoEncontradaException : handler 404
 ```
 
-## Decisiones de diseño
+Flecha sólida con triángulo: **herencia**; línea discontinua con triángulo:
+**implementación de interfaz**; flecha normal: **uso/dependencia**; rombo:
+**composición**. Las dos excepciones heredan de la misma base, no una de la otra.
+El diagrama enfoca las tres clases de la simulación; los demás mobs anteriores permanecen.
 
-- **Método abstracto en la clase base:** `Entidad.comportamiento()`. Las dos hijas `Hostiles` y `NoHostiles`
-  lo implementan de forma independiente (atacar o interactuar), y cada mob concreto redefine solo su parte
-  (`accionDeAtaque()` o `interactuar()`).
-- **Trato uniforme:** el controller y `Main` solo usan el tipo `Entidad` para moverse, recibir daño y
-  desaparecer, sin preguntar el tipo concreto.
-- **Ocultamiento:** todos los campos son `private` y no hay setters. La vida solo cambia con `recibirDanio()`
-  o `desaparecer()`. Los constructores validan los datos (vida > 0, daño ≥ 0, hitbox positiva, daño base ≥ 0,
-  profesión no vacía) y una entidad muerta no puede moverse ni recibir daño.
-- **Constructores sobrecargados:** cada entidad tiene un constructor por defecto con valores razonables y otro
-  que recibe parámetros para ser construido desde la API REST.
-- **Sin campos `protected`:** donde una hija necesita algo de la base se usa un método `protected`.
-  `desaparecer()` existe porque el `Creeper` muere al explotar sin recibir daño, y `describirAvance()`
-  porque el `Creeper` avanza de forma sigilosa.
+## Sobrecarga, sobreescritura y demos anteriores
+
+`Entidad.comportamiento()` sigue siendo abstracto. `Player` y `Hostiles` lo
+sobreescriben; `Zombie` también lo redefine y `Creeper` especializa `accionDeAtaque`.
+La misma llamada usa el comportamiento de la clase real: **sobreescritura**.
+
+`Player()` y `Player(vida,danoBase,velocidad)`, así como los constructores de Zombie,
+son **sobrecarga**: mismo nombre, parámetros diferentes. También siguen existiendo
+`Esqueleto.disparar()` y `Esqueleto.disparar(int distancia)`. JPA usa constructores
+sin argumentos públicos/protegidos; solo `Entidad()` protegido se reserva para hidratación.
+Los constructores públicos de negocio siguen dejando instancias legales.
+
+Se conservan las demos GET temporales (no son el CRUD ni guardan sus acciones):
+`/entidad/{tipo}`, `/entidades/zombie`, `/entidades/esqueleto/disparar`,
+`/entidades/comportamientos` y `/entidades`.
+
+## Importar y recorrer Insomnia
+
+1. En Insomnia, **Import → File**, seleccionar [`insomnia/minecraft.yaml`](insomnia/minecraft.yaml).
+2. Editar **Base Environment**: `base_url` es `http://localhost:8080`. Los IDs comienzan
+   en 0 deliberadamente: copiar cada ID real devuelto por los POST a la variable indicada.
+3. Recorrer **01 — Estado y CRUD** (pedidos 01–11): alta, lectura, PUT, POST ilegal,
+   comprobación sin basura, DELETE y 404.
+4. Recorrer **02 — Explosión normal** (12–19): guardar los tres IDs, ejecutar movimientos,
+   simular y comprobar Player en 7, Zombie y Creeper ausentes.
+5. Detener y arrancar de nuevo; repetir el GET 17: la vida debe seguir en 7.
+6. Recorrer **03 — Carga** (20–23): Creeper cargado y Player de 100 en la misma posición;
+   simular y verificar 60 en el GET.
+7. Recorrer **04 — Excepciones** (24–28): ver códigos diferentes 400/409, crear el Creeper
+   sin posición y confirmar que los errores no dañaron los registros existentes.
+
+Ejecutar una vez cada simulación por Creeper; para repetir, crear otro y actualizar IDs.
+La colección es destructiva sobre las entidades del escenario y puede afectar otros
+objetivos cercanos: usar una base de desarrollo, no datos importantes. Las coordenadas
+de ambos escenarios están separadas. El export antiguo en la raíz se conserva como
+historial, pero **la colección de entrega es `insomnia/minecraft.yaml`**.
+
+## Entrega
+
+- [Especificaciones para adjuntar en Classroom](docs/ESPECIFICACIONES-POO08.md).
+- [Bitácora de asistencia IA](BITACORA.md), con agente, modelo exacto y prompts.
+- [Enunciado](https://github.com/alefq/afq-taller-git-2024/blob/main/docs/ejercicio-poo-08-crud-h2-insomnia-2026-10-28.md)
+  y [rúbrica](https://github.com/alefq/afq-taller-git-2024/blob/main/docs/RUBRICA-ejercicios-lp3-2026.md).
+- Licencia: [Apache 2.0](LICENSE).
+
+El enlace fijo al commit de solución se registra al cerrar los commits de esta entrega.

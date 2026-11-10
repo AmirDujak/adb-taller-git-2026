@@ -313,4 +313,52 @@ git push
 - Mantener los campos privados y validar en los constructores garantiza que ninguna entidad pueda
   quedar en un estado imposible.
 - Con Git cada paso del taller quedó registrado en el historial, y pudimos integrar los cambios de un
-  compañero sin conflictos.
+   compañero sin conflictos.
+
+---
+
+## Entrada 8 — POO-08: persistencia, simulación y entrega individual
+
+**Fecha:** 2026-11-09
+
+**Marca del agente:** OpenCode. **Proveedor:** OpenAI.
+**Modelo exacto informado por la herramienta:** `openai/gpt-6.1-sol` (GPT-6.1 Sol).
+
+### Resumen de prompts y alcance de la asistencia
+
+- Se proporcionó el enunciado POO-08, la rúbrica y el template de paquetes, solicitando
+  CRUD H2, tres clases persistidas, dos reglas, excepciones, interfaz y entregables.
+- Se pidió primero revisar el repositorio y proponer un plan; el agente contrastó
+  código y documentación sin modificar archivos durante la planificación.
+- Luego se indicó «Hazlo»: implementar el plan conservando Minecraft, las rutas
+  existentes y los datos H2 anteriores, y completar pruebas y documentación.
+
+### Cambios asistidos
+
+- Unificación de la representación persistente con la jerarquía real de `Entidad`;
+  Creeper, Player y Zombie se recuperan como sus clases concretas, no como registros paralelos.
+- Validaciones dentro del dominio, constructores y callbacks JPA; colecciones encapsuladas.
+- Dos reglas documentadas: onda según distancia y daño doble por carga eléctrica.
+  La explosión consume el origen, guarda supervivientes y elimina objetivos muertos.
+- Familia `JuegoException`, `EstadoEntidadInvalidoException` y
+  `ExplosionNoPermitidaException`, con handlers diferenciados y 404 separado.
+- Endpoint de lectura con referencias `Movimientos`; colección Insomnia completa
+  en `insomnia/`, README y especificaciones Markdown para Classroom.
+- Pruebas de CRUD, subtipos, reglas, errores, rollback, esquema anterior y reapertura
+  de H2 en archivo temporal; la base personal de `data/` no se usa para estas pruebas.
+
+Las entradas 1–7 reflejan ejercicios anteriores que incluyeron prácticas colaborativas;
+no se borran ni se atribuyen a este trabajo. **La entrega POO-08 es individual.**
+No se solicita revisión de un compañero ni se inventan aprobaciones o pruebas manuales
+en Insomnia que no se hayan realizado. El alumno debe revisar y poder defender el diseño.
+
+### Verificación realizada
+
+- `./mvnw test`: 59 pruebas, sin fallos ni errores.
+- Export YAML y cuerpos JSON verificados sintácticamente; los 28 pedidos se
+  reprodujeron por HTTP contra `./mvnw spring-boot:run`, usando puerto y H2 temporal
+  aislados. Se comprobó un reinicio real y el Player conservó vida 7.
+- No se operó la interfaz gráfica de Insomnia; la importación visual queda para la
+  revisión del alumno. Se conserva el formato de exportación v5 utilizado previamente.
+- Publicación prevista mediante commits separados en la rama existente
+  `feature/markdown`; sin reescribir el historial ni modificar `main`.
