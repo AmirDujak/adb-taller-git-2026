@@ -349,8 +349,8 @@ siete variables, reemplazo de IDs anteriores y rechazo de respuestas/IDs inváli
 - Licencia: [Apache 2.0](LICENSE).
 
 **Commit de la solución completa:**
-https://github.com/AmirDujak/adb-taller-git-2026/commit/213bca1caf5e8e35ce5044fa89163d0b37a05f0e
+https://github.com/AmirDujak/adb-taller-git-2026/commit/d9c66484eff44c49112be9c1042425c58e8d7e3c
 
 El commit posterior solo fija este enlace en la documentación; el snapshot enlazado
-ya incluye código, pruebas, colección y especificaciones. Para Classroom, adjuntar
+ya incluye código, pruebas, colección con IDs automáticos y especificaciones. Para Classroom, adjuntar
 la versión de las especificaciones que contiene este enlace.

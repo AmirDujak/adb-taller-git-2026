@@ -143,7 +143,7 @@ del export, sin depender de IDs fijos ni cambiar la base de datos.
 Adjuntar este Markdown y pegar el enlace exacto al commit de solución.
 
 **Commit de la solución:**
-https://github.com/AmirDujak/adb-taller-git-2026/commit/213bca1caf5e8e35ce5044fa89163d0b37a05f0e
+https://github.com/AmirDujak/adb-taller-git-2026/commit/d9c66484eff44c49112be9c1042425c58e8d7e3c
 
-Ese snapshot incluye implementación, pruebas, colección y documentación. El commit
+Ese snapshot incluye implementación, pruebas, colección con IDs automáticos y documentación. El commit
 posterior únicamente agrega el enlace fijo a los documentos, sin cambiar el servicio.
