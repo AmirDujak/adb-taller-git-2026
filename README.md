@@ -352,7 +352,7 @@ Incluyen respuestas 201 con `status` textual o vacío, como las que expone Insom
 - Licencia: [Apache 2.0](LICENSE).
 
 **Commit de la solución completa:**
-https://github.com/AmirDujak/adb-taller-git-2026/commit/d9c66484eff44c49112be9c1042425c58e8d7e3c
+https://github.com/AmirDujak/adb-taller-git-2026/commit/8fb53f29c950ac7e47357b2c17c8cc31544257df
 
 El commit posterior solo fija este enlace en la documentación; el snapshot enlazado
 ya incluye código, pruebas, colección con IDs automáticos y especificaciones. Para Classroom, adjuntar
