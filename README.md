@@ -297,7 +297,7 @@ Se conservan las demos GET temporales (no son el CRUD ni guardan sus acciones):
 
 1. En Insomnia, **Import → File**, seleccionar [`insomnia/minecraft.yaml`](insomnia/minecraft.yaml).
    Si ya se importó una versión anterior, volver a importar y usar la colección cuyo
-   nombre termina en **IDs automáticos**; editar el archivo no actualiza la copia anterior en Insomnia.
+   nombre termina en **IDs automáticos (corregido)**; editar el archivo no actualiza la copia anterior en Insomnia.
 2. Revisar **Base Environment**: `base_url` es `http://localhost:8080`. Los scripts
    de los siete POST válidos capturan el ID y actualizan el entorno automáticamente;
    **no hay que copiar IDs**. Los valores 0 son solo el estado inicial del export.
@@ -322,7 +322,9 @@ Cada alta limpia su variable antes de enviar el POST y solo guarda un ID entero
 positivo si recibe 201; de lo contrario el script informa un error y deja 0 para no
 reutilizar silenciosamente un ID antiguo. Los POST ilegales y las simulaciones no
 sobrescriben esas variables. Los scripts usan la API documentada de Insomnia:
-`insomnia.response.json()` e `insomnia.environment.set()`.
+`insomnia.response.code`, `insomnia.response.json()` e `insomnia.environment.set()`.
+El código HTTP numérico está en `code`; `status` es una frase textual (por ejemplo,
+`"Created"`) y no debe compararse con 201. Las pruebas reproducen esa distinción.
 
 Ejecutar una vez cada simulación por Creeper; para repetir, volver a ejecutar la
 carpeta del escenario desde sus altas: los IDs se reemplazan automáticamente.
@@ -339,6 +341,7 @@ node --test insomnia/tests/automatic-ids.test.cjs
 
 Se ejecutan los scripts reales del YAML con respuestas simuladas: captura de las
 siete variables, reemplazo de IDs anteriores y rechazo de respuestas/IDs inválidos.
+Incluyen respuestas 201 con `status` textual o vacío, como las que expone Insomnia.
 
 ## Entrega
 

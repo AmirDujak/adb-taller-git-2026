@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const { execFileSync } = require('node:child_process');
 const path = require('node:path');
 const vm = require('node:vm');
+const { STATUS_CODES } = require('node:http');
 
 // Ruby aporta su parser YAML estándar; no se agregan dependencias al proyecto Java.
 const collection = JSON.parse(execFileSync('ruby', ['-ryaml', '-rjson', '-e',
@@ -19,11 +20,12 @@ const captures = {
   req_sin_posicion: 'creeper_sin_posicion_id',
 };
 
-function fixture(request, status, body) {
+function fixture(request, code, body, status = STATUS_CODES[code] || '') {
   const values = { ...collection.environments.data };
   const context = vm.createContext({ insomnia: {
     environment: { set: (key, value) => { values[key] = value; } },
-    response: { status, json: () => JSON.parse(body) },
+    // API real de Insomnia: code es el número HTTP; status es la frase textual.
+    response: { code, status, json: () => JSON.parse(body) },
   } });
   return {
     values,
@@ -47,6 +49,18 @@ for (const [requestId, variable] of Object.entries(captures)) {
     run.after();
     assert.equal(run.values[variable], 12345);
     assert.deepEqual(Object.keys(run.values).filter(key => run.values[key] !== collection.environments.data[key]), [variable]);
+  });
+  test(`${variable}: usa code=201 aunque status sea textual o esté vacío`, () => {
+    for (const status of ['Created', '', 'Creado']) {
+      const run = fixture(request, 201, '{"id":42}', status);
+      run.before();
+      run.after();
+      assert.equal(run.values[variable], 42);
+    }
+    const failed = fixture(request, 400, '{"id":42}', 'Created');
+    failed.before();
+    assert.throws(failed.after);
+    assert.equal(failed.values[variable], 0);
   });
   test(`${variable}: un POST fallido o ID inválido no reutiliza el ID anterior`, () => {
     for (const [status, body] of [[400, '{}'], [500, '{}'], [200, '{"id":1}'],

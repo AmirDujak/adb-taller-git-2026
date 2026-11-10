@@ -1,6 +1,6 @@
 type: collection.insomnia.rest/5.0
 schema_version: "5.1"
-name: Minecraft POO-08 — CRUD, H2 y explosiones — IDs automáticos
+name: Minecraft POO-08 — CRUD, H2 y explosiones — IDs automáticos (corregido)
 meta:
   id: wrk_minecraft_poo08
   description: Ejecutar secuencialmente las carpetas 01 a 04. Los scripts guardan automáticamente los IDs de cada POST válido. Las simulaciones modifican H2.
@@ -17,7 +17,7 @@ collection:
         scripts:
           preRequest: insomnia.environment.set("entidad_id", 0);
           afterResponse: |
-            if (insomnia.response.status !== 201) {
+            if (insomnia.response.code !== 201) {
               throw new Error("No se creó el Zombie: entidad_id no fue actualizado.");
             }
             const { id } = insomnia.response.json();
@@ -83,7 +83,7 @@ collection:
         scripts:
           preRequest: insomnia.environment.set("creeper_id", 0);
           afterResponse: |
-            if (insomnia.response.status !== 201) {
+            if (insomnia.response.code !== 201) {
               throw new Error("No se creó el Creeper: creeper_id no fue actualizado.");
             }
             const { id } = insomnia.response.json();
@@ -102,7 +102,7 @@ collection:
         scripts:
           preRequest: insomnia.environment.set("player_id", 0);
           afterResponse: |
-            if (insomnia.response.status !== 201) {
+            if (insomnia.response.code !== 201) {
               throw new Error("No se creó el Player: player_id no fue actualizado.");
             }
             const { id } = insomnia.response.json();
@@ -121,7 +121,7 @@ collection:
         scripts:
           preRequest: insomnia.environment.set("zombie_id", 0);
           afterResponse: |
-            if (insomnia.response.status !== 201) {
+            if (insomnia.response.code !== 201) {
               throw new Error("No se creó el Zombie: zombie_id no fue actualizado.");
             }
             const { id } = insomnia.response.json();
@@ -167,7 +167,7 @@ collection:
         scripts:
           preRequest: insomnia.environment.set("creeper_cargado_id", 0);
           afterResponse: |
-            if (insomnia.response.status !== 201) {
+            if (insomnia.response.code !== 201) {
               throw new Error("No se creó el Creeper cargado: creeper_cargado_id no fue actualizado.");
             }
             const { id } = insomnia.response.json();
@@ -186,7 +186,7 @@ collection:
         scripts:
           preRequest: insomnia.environment.set("player_carga_id", 0);
           afterResponse: |
-            if (insomnia.response.status !== 201) {
+            if (insomnia.response.code !== 201) {
               throw new Error("No se creó el Player resistente: player_carga_id no fue actualizado.");
             }
             const { id } = insomnia.response.json();
@@ -236,7 +236,7 @@ collection:
         scripts:
           preRequest: insomnia.environment.set("creeper_sin_posicion_id", 0);
           afterResponse: |
-            if (insomnia.response.status !== 201) {
+            if (insomnia.response.code !== 201) {
               throw new Error("No se creó el Creeper sin posición: creeper_sin_posicion_id no fue actualizado.");
             }
             const { id } = insomnia.response.json();

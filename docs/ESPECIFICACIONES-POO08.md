@@ -108,7 +108,7 @@ El cuerpo contiene `codigo` y `error`. Las hijas las lanzan objetos del dominio.
 
 1. Arrancar y abrir Insomnia: **Import → File → `insomnia/minecraft.yaml`**.
    Si estaba importada la versión manual, volver a importar y usar la colección
-   cuyo nombre termina en **IDs automáticos**.
+   cuyo nombre termina en **IDs automáticos (corregido)**.
 2. Revisar `base_url` en Base Environment y ejecutar la carpeta 01 en orden.
    Los scripts de cada POST válido guardan automáticamente sus IDs en el entorno;
    no copiar valores ni asumir IDs consecutivos. Ejecutar secuencialmente una iteración.
@@ -137,6 +137,8 @@ archivo temporal. No tocan la base personal de `data/`.
 Pruebas específicas de la automatización (Node.js y Ruby):
 `node --test insomnia/tests/automatic-ids.test.cjs`. Comprueban los siete scripts
 del export, sin depender de IDs fijos ni cambiar la base de datos.
+El guardado comprueba `insomnia.response.code === 201`; `status` es el texto HTTP,
+no el número. Las pruebas cubren esa distinción y respuestas con texto vacío.
 
 ## Entrega en Classroom
 

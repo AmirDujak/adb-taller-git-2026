@@ -387,3 +387,29 @@ automática y luego indicó «Hazlo» para automatizar la colección y actualiza
   la API de entorno/respuesta emulada en Node.js, sin asignación manual de IDs.
   Se verificaron reemplazo de IDs entre corridas y persistencia tras reiniciar.
   Esto no sustituye la verificación visual de importación y corrida en Insomnia.
+
+## Entrada 10 — Corrección de code/status en los scripts
+
+**Fecha:** 2026-11-09. **Agente:** OpenCode. **Proveedor:** OpenAI.
+**Modelo exacto:** `openai/gpt-6.1-sol` (GPT-6.1 Sol).
+
+**Resumen de prompts:** el alumno compartió otra corrida de Insomnia 13.4.0 donde
+los POST guardaban entidades pero los scripts fallaban y los IDs seguían en 0;
+después del diagnóstico indicó «Hazlo» para corregir y volver a publicar.
+
+- El agente había confundido `insomnia.response.status` (frase textual) con
+  `insomnia.response.code` (número HTTP). Las pruebas anteriores emulaban mal
+  `status` y por eso no detectaban el error. Esta entrada corrige la conclusión
+  de la entrada 9: aquella verificación no acreditaba compatibilidad real.
+- Se contrastó el objeto Response del código fuente de Insomnia y su manejo de
+  entornos. Se corrigieron los siete scripts para comprobar `code !== 201`.
+- Primero se ajustó el fixture al contrato real y se reprodujo el fallo; luego se
+  corrigió el YAML y se agregaron casos 201 con status textual, vacío o traducido,
+  además de un error 400 con status engañoso para exigir el uso del número.
+- La colección se distingue como **IDs automáticos (corregido)** para evitar usar
+  la copia anterior. No se cambió Java ni se tocó la H2 personal del alumno.
+- Verificación posterior: 22 pruebas de scripts aprobadas y 59 pruebas Maven sin
+  fallos; dos recorridos de 28 pedidos HTTP con los scripts del YAML ejecutados
+  en Node.js y la respuesta emulada con `code` numérico y `status` textual real
+  del transporte. Se repitió el GET del Player tras reiniciar y conservó vida 7.
+  No se afirma haber ejecutado la interfaz gráfica o el motor real de Insomnia.
