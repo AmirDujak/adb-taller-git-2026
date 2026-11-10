@@ -1,0 +1,199 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: Minecraft POO-08 — CRUD, H2 y explosiones
+meta:
+  id: wrk_minecraft_poo08
+  description: Ejecutar en orden. Copiar los IDs de las respuestas al entorno; no asumir IDs consecutivos. Las simulaciones modifican H2.
+collection:
+  - name: 01 — Estado y CRUD
+    meta: {id: fld_crud, sortKey: 100}
+    children:
+      - name: 01 Vivo — 200
+        meta: {id: req_vivo, sortKey: 101}
+        method: GET
+        url: "{{ _.base_url }}/"
+      - name: 02 Crear Zombie — 201; copiar id a entidad_id
+        meta: {id: req_crear, sortKey: 102}
+        method: POST
+        url: "{{ _.base_url }}/api/lp3/entidades"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"nombre":"Zombie CRUD","tipo":"ZOMBIE","vida":20,"danoBase":5,"velocidadMovimiento":0.7,"hitbox":{"ancho":0.6,"alto":1.95,"profundidad":0.6},"sonidos":["gruñido"],"drop":["carne_podrida"],"posicion":{"x":1000,"y":64,"z":0}}'
+      - name: 03 Listar — 200
+        meta: {id: req_listar, sortKey: 103}
+        method: GET
+        url: "{{ _.base_url }}/api/lp3/entidades"
+      - name: 04 Buscar por ID — 200
+        meta: {id: req_buscar, sortKey: 104}
+        method: GET
+        url: "{{ _.base_url }}/api/lp3/entidades/{{ _.entidad_id }}"
+      - name: 05 Actualizar vida a 30 — 200
+        meta: {id: req_actualizar, sortKey: 105}
+        method: PUT
+        url: "{{ _.base_url }}/api/lp3/entidades/{{ _.entidad_id }}"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"nombre":"Zombie CRUD","tipo":"ZOMBIE","vida":30,"danoBase":5,"velocidadMovimiento":0.7,"hitbox":{"ancho":0.6,"alto":1.95,"profundidad":0.6},"sonidos":["gruñido"],"drop":["carne_podrida"]}'
+      - name: 06 Confirmar vida 30 — 200
+        meta: {id: req_confirmar_put, sortKey: 106}
+        method: GET
+        url: "{{ _.base_url }}/api/lp3/entidades/{{ _.entidad_id }}"
+      - name: 07 POST ilegal vida 0 — 400 ESTADO_ENTIDAD_INVALIDO
+        meta: {id: req_ilegal, sortKey: 107}
+        method: POST
+        url: "{{ _.base_url }}/api/lp3/entidades"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"nombre":"Zombie ilegal","tipo":"ZOMBIE","vida":0,"danoBase":5,"velocidadMovimiento":1,"hitbox":{"ancho":1,"alto":1,"profundidad":1},"sonidos":[],"drop":[]}'
+      - name: 08 Listar — misma cantidad que antes del POST ilegal
+        meta: {id: req_sin_basura, sortKey: 108}
+        method: GET
+        url: "{{ _.base_url }}/api/lp3/entidades"
+      - name: 09 Borrar Zombie CRUD — 204
+        meta: {id: req_borrar, sortKey: 109}
+        method: DELETE
+        url: "{{ _.base_url }}/api/lp3/entidades/{{ _.entidad_id }}"
+      - name: 10 Buscar borrado — 404 ENTIDAD_NO_ENCONTRADA
+        meta: {id: req_borrado, sortKey: 110}
+        method: GET
+        url: "{{ _.base_url }}/api/lp3/entidades/{{ _.entidad_id }}"
+      - name: 11 ID inexistente — 404
+        meta: {id: req_inexistente, sortKey: 111}
+        method: GET
+        url: "{{ _.base_url }}/api/lp3/entidades/999999999"
+  - name: 02 — Explosión normal persistida
+    meta: {id: fld_normal, sortKey: 200}
+    children:
+      - name: 12 Crear Creeper — copiar id a creeper_id
+        meta: {id: req_creeper, sortKey: 201}
+        method: POST
+        url: "{{ _.base_url }}/api/lp3/entidades"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"nombre":"Creeper","tipo":"CREEPER","cargado":false,"vida":20,"danoBase":0,"velocidadMovimiento":0.8,"hitbox":{"ancho":0.6,"alto":1.7,"profundidad":0.6},"sonidos":["siseo"],"drop":["polvora"],"posicion":{"x":0,"y":64,"z":0}}'
+      - name: 13 Crear Player — copiar id a player_id
+        meta: {id: req_player, sortKey: 202}
+        method: POST
+        url: "{{ _.base_url }}/api/lp3/entidades"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"nombre":"Player","tipo":"PLAYER","vida":20,"danoBase":5,"velocidadMovimiento":1,"hitbox":{"ancho":0.6,"alto":1.8,"profundidad":0.6},"sonidos":[],"drop":[],"posicion":{"x":1,"y":64,"z":0}}'
+      - name: 14 Crear Zombie de vida 5 — copiar id a zombie_id
+        meta: {id: req_zombie, sortKey: 203}
+        method: POST
+        url: "{{ _.base_url }}/api/lp3/entidades"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"nombre":"Zombie","tipo":"ZOMBIE","vida":5,"danoBase":5,"velocidadMovimiento":0.7,"hitbox":{"ancho":0.6,"alto":1.95,"profundidad":0.6},"sonidos":[],"drop":[],"posicion":{"x":2,"y":64,"z":0}}'
+      - name: 15 Interface Movimientos — 200; no modifica vidas ni posiciones
+        meta: {id: req_movimientos, sortKey: 204}
+        method: GET
+        url: "{{ _.base_url }}/api/lp3/entidades/movimientos"
+      - name: 16 Simular normal — 200; Player queda en 7 y Zombie desaparece
+        meta: {id: req_simular, sortKey: 205}
+        method: POST
+        url: "{{ _.base_url }}/api/lp3/explosiones/simular"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"creeperId":{{ _.creeper_id }}}'
+      - name: 17 GET Player — vida 7 incluso después de reiniciar
+        meta: {id: req_player_despues, sortKey: 206}
+        method: GET
+        url: "{{ _.base_url }}/api/lp3/entidades/{{ _.player_id }}"
+      - name: 18 GET Zombie eliminado — 404
+        meta: {id: req_zombie_despues, sortKey: 207}
+        method: GET
+        url: "{{ _.base_url }}/api/lp3/entidades/{{ _.zombie_id }}"
+      - name: 19 GET Creeper consumido — 404
+        meta: {id: req_creeper_despues, sortKey: 208}
+        method: GET
+        url: "{{ _.base_url }}/api/lp3/entidades/{{ _.creeper_id }}"
+  - name: 03 — Carga duplica el daño
+    meta: {id: fld_carga, sortKey: 300}
+    children:
+      - name: 20 Crear Creeper cargado — copiar id a creeper_cargado_id
+        meta: {id: req_cargado, sortKey: 301}
+        method: POST
+        url: "{{ _.base_url }}/api/lp3/entidades"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"nombre":"Creeper cargado","tipo":"CREEPER","cargado":true,"vida":20,"danoBase":0,"velocidadMovimiento":0.8,"hitbox":{"ancho":0.6,"alto":1.7,"profundidad":0.6},"sonidos":[],"drop":[],"posicion":{"x":100,"y":64,"z":0}}'
+      - name: 21 Crear Player de vida 100 — copiar id a player_carga_id
+        meta: {id: req_player_carga, sortKey: 302}
+        method: POST
+        url: "{{ _.base_url }}/api/lp3/entidades"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"nombre":"Player resistente","tipo":"PLAYER","vida":100,"danoBase":5,"velocidadMovimiento":1,"hitbox":{"ancho":0.6,"alto":1.8,"profundidad":0.6},"sonidos":[],"drop":[],"posicion":{"x":100,"y":64,"z":0}}'
+      - name: 22 Simular cargado — daño 40 en distancia 0
+        meta: {id: req_simular_carga, sortKey: 303}
+        method: POST
+        url: "{{ _.base_url }}/api/lp3/explosiones/simular"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"creeperId":{{ _.creeper_cargado_id }}}'
+      - name: 23 GET Player resistente — vida 60
+        meta: {id: req_carga_despues, sortKey: 304}
+        method: GET
+        url: "{{ _.base_url }}/api/lp3/entidades/{{ _.player_carga_id }}"
+  - name: 04 — Excepciones del dominio
+    meta: {id: fld_errores, sortKey: 400}
+    children:
+      - name: 24 EstadoEntidadInvalidoException — 400; Player no puede estar cargado
+        meta: {id: req_estado_invalido, sortKey: 401}
+        method: POST
+        url: "{{ _.base_url }}/api/lp3/entidades"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"nombre":"Player ilegal","tipo":"PLAYER","cargado":true,"vida":20,"danoBase":5,"velocidadMovimiento":1,"hitbox":{"ancho":1,"alto":1,"profundidad":1},"sonidos":[],"drop":[]}'
+      - name: 25 ExplosionNoPermitidaException — 409; Player no explota
+        meta: {id: req_explosion_no_permitida, sortKey: 402}
+        method: POST
+        url: "{{ _.base_url }}/api/lp3/explosiones/simular"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"creeperId":{{ _.player_id }}}'
+      - name: 26 Crear Creeper sin posición — copiar id a creeper_sin_posicion_id
+        meta: {id: req_sin_posicion, sortKey: 403}
+        method: POST
+        url: "{{ _.base_url }}/api/lp3/entidades"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"nombre":"Creeper sin posición","tipo":"CREEPER","vida":20,"danoBase":0,"velocidadMovimiento":0.8,"hitbox":{"ancho":0.6,"alto":1.7,"profundidad":0.6},"sonidos":[],"drop":[]}'
+      - name: 27 ExplosionNoPermitidaException — 409; falta posición
+        meta: {id: req_explosion_sin_posicion, sortKey: 404}
+        method: POST
+        url: "{{ _.base_url }}/api/lp3/explosiones/simular"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"creeperId":{{ _.creeper_sin_posicion_id }}}'
+      - name: 28 Listar — errores no alteraron las entidades existentes
+        meta: {id: req_despues_errores, sortKey: 405}
+        method: GET
+        url: "{{ _.base_url }}/api/lp3/entidades"
+environments:
+  name: Base Environment
+  meta: {id: env_minecraft_poo08}
+  data:
+    base_url: http://localhost:8080
+    entidad_id: 0
+    creeper_id: 0
+    player_id: 0
+    zombie_id: 0
+    creeper_cargado_id: 0
+    player_carga_id: 0
+    creeper_sin_posicion_id: 0
