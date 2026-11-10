@@ -132,4 +132,9 @@ archivo temporal. No tocan la base personal de `data/`.
 ## Entrega en Classroom
 
 Adjuntar este Markdown y pegar el enlace exacto al commit de solución.
-El enlace se completa después de crear el commit verificable; no se usa una URL a una rama.
+
+**Commit de la solución:**
+https://github.com/AmirDujak/adb-taller-git-2026/commit/213bca1caf5e8e35ce5044fa89163d0b37a05f0e
+
+Ese snapshot incluye implementación, pruebas, colección y documentación. El commit
+posterior únicamente agrega el enlace fijo a los documentos, sin cambiar el servicio.

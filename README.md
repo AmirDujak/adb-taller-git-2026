@@ -322,4 +322,9 @@ historial, pero **la colección de entrega es `insomnia/minecraft.yaml`**.
   y [rúbrica](https://github.com/alefq/afq-taller-git-2024/blob/main/docs/RUBRICA-ejercicios-lp3-2026.md).
 - Licencia: [Apache 2.0](LICENSE).
 
-El enlace fijo al commit de solución se registra al cerrar los commits de esta entrega.
+**Commit de la solución completa:**
+https://github.com/AmirDujak/adb-taller-git-2026/commit/213bca1caf5e8e35ce5044fa89163d0b37a05f0e
+
+El commit posterior solo fija este enlace en la documentación; el snapshot enlazado
+ya incluye código, pruebas, colección y especificaciones. Para Classroom, adjuntar
+la versión de las especificaciones que contiene este enlace.
