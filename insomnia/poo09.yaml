@@ -1,0 +1,219 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: Minecraft POO-09 — Amir · Sofía · Nicolás
+meta:
+  id: wrk_minecraft_poo09
+  description: Ejecutar carpetas 01 a 04 secuencialmente. Preparación crea registros nuevos en Sofía y Nicolás; el escenario solo valida y guarda autorizaciones en Amir. No ejecuta explosiones.
+collection:
+  - name: 01 — OpenAPI y preparación (crea datos remotos)
+    meta: {id: fld_p09_preparar, sortKey: 100}
+    children:
+      - name: OpenAPI Amir
+        meta: {id: req_p09_openapi_a1, sortKey: 101}
+        method: GET
+        url: "{{ _.a1_base_url }}/v3/api-docs"
+      - name: OpenAPI Sofía
+        meta: {id: req_p09_openapi_a2, sortKey: 102}
+        method: GET
+        url: "{{ _.a2_base_url }}/v3/api-docs"
+      - name: OpenAPI Nicolás
+        meta: {id: req_p09_openapi_a3, sortKey: 103}
+        method: GET
+        url: "{{ _.a3_base_url }}/v3/api-docs"
+      - name: Crear Creeper vivo en Sofía
+        meta: {id: req_p09_sofia_creeper, sortKey: 104}
+        method: POST
+        url: "{{ _.a2_base_url }}/api/entidades"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"nombre":"POO09 Amir Creeper vivo","tipo":"CREEPER","salud":20,"ubicacion":{"x":20000,"y":64,"z":0}}'
+        scripts:
+          preRequest: insomnia.environment.set("creeper_sofia_id", "");
+          afterResponse: |
+            const id = insomnia.response.json().id;
+            if (insomnia.response.code !== 201 || !/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(id)) throw new Error("No se creó el Creeper");
+            insomnia.environment.set("creeper_sofia_id", id);
+      - name: Crear Creeper muerto en Sofía — rechazo A2
+        meta: {id: req_p09_sofia_muerto, sortKey: 105}
+        method: POST
+        url: "{{ _.a2_base_url }}/api/entidades"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"nombre":"POO09 Amir Creeper muerto","tipo":"CREEPER","salud":0,"ubicacion":{"x":20000,"y":64,"z":0}}'
+        scripts:
+          preRequest: insomnia.environment.set("creeper_muerto_sofia_id", "");
+          afterResponse: |
+            const id = insomnia.response.json().id;
+            if (insomnia.response.code !== 201 || !/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(id)) throw new Error("No se creó el Creeper muerto");
+            insomnia.environment.set("creeper_muerto_sofia_id", id);
+      - name: Crear jugador en Sofía
+        meta: {id: req_p09_sofia_jugador, sortKey: 106}
+        method: POST
+        url: "{{ _.a2_base_url }}/api/entidades"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"nombre":"POO09 Amir Jugador","tipo":"JUGADOR","salud":20,"ubicacion":{"x":20001,"y":64,"z":0}}'
+        scripts:
+          preRequest: insomnia.environment.set("jugador_sofia_id", "");
+          afterResponse: |
+            const id = insomnia.response.json().id;
+            if (insomnia.response.code !== 201 || !/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(id)) throw new Error("No se creó el jugador");
+            insomnia.environment.set("jugador_sofia_id", id);
+      - name: Crear cerdo en Sofía
+        meta: {id: req_p09_sofia_cerdo, sortKey: 107}
+        method: POST
+        url: "{{ _.a2_base_url }}/api/entidades"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"nombre":"POO09 Amir Cerdo","tipo":"CERDO","salud":10,"ubicacion":{"x":20002,"y":64,"z":0}}'
+        scripts:
+          preRequest: insomnia.environment.set("cerdo_sofia_id", "");
+          afterResponse: |
+            const id = insomnia.response.json().id;
+            if (insomnia.response.code !== 201 || !/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(id)) throw new Error("No se creó el cerdo");
+            insomnia.environment.set("cerdo_sofia_id", id);
+      - name: Crear Creeper en Nicolás
+        meta: {id: req_p09_nicolas_creeper, sortKey: 108}
+        method: POST
+        url: "{{ _.a3_base_url }}/api/minecraft/mobs/creepers"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"x":20000,"y":64,"z":0,"tiempoDetonacion":3}'
+        scripts:
+          preRequest: insomnia.environment.set("explosivo_nicolas_id", "");
+          afterResponse: |
+            const id = insomnia.response.json().id;
+            if (insomnia.response.code !== 201 || !/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(id)) throw new Error("No se creó el explosivo");
+            insomnia.environment.set("explosivo_nicolas_id", id);
+      - name: Crear Zombie en Nicolás — rechazo A3
+        meta: {id: req_p09_nicolas_zombie, sortKey: 109}
+        method: POST
+        url: "{{ _.a3_base_url }}/api/minecraft/mobs/zombies"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"x":20000,"y":64,"z":0}'
+        scripts:
+          preRequest: insomnia.environment.set("zombie_nicolas_id", "");
+          afterResponse: |
+            const id = insomnia.response.json().id;
+            if (insomnia.response.code !== 201 || !/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(id)) throw new Error("No se creó el Zombie");
+            insomnia.environment.set("zombie_nicolas_id", id);
+  - name: 02 — Camino feliz persistido
+    meta: {id: fld_p09_feliz, sortKey: 200}
+    children:
+      - name: Guardar estado previo
+        meta: {id: req_p09_antes_feliz, sortKey: 201}
+        method: GET
+        url: "{{ _.a1_base_url }}/api/lp3/jugadas-cruzadas"
+        scripts:
+          afterResponse: |
+            if (insomnia.response.code !== 200) throw new Error("No se pudo leer A1");
+            insomnia.environment.set("cantidad_previa", insomnia.response.json().length);
+      - name: Escenario feliz — 201
+        meta: {id: req_p09_feliz, sortKey: 202}
+        method: POST
+        url: "{{ _.a1_base_url }}/api/lp3/jugadas-cruzadas"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"creeperSofiaId":"{{ _.creeper_sofia_id }}","jugadorSofiaId":"{{ _.jugador_sofia_id }}","cerdoSofiaId":"{{ _.cerdo_sofia_id }}","explosivoNicolasId":"{{ _.explosivo_nicolas_id }}"}'
+        scripts:
+          preRequest: insomnia.environment.set("jugada_id", 0);
+          afterResponse: |
+            const j = insomnia.response.json();
+            if (insomnia.response.code !== 201 || !Number.isSafeInteger(j.id) || j.id <= 0 || j.aceptadaSofia !== true || j.puedeExplotarNicolas !== true) throw new Error("No se confirmó la jugada");
+            insomnia.environment.set("jugada_id", j.id);
+      - name: Recuperar jugada — repetir tras reiniciar A1
+        meta: {id: req_p09_get_jugada, sortKey: 203}
+        method: GET
+        url: "{{ _.a1_base_url }}/api/lp3/jugadas-cruzadas/{{ _.jugada_id }}"
+        scripts:
+          afterResponse: |
+            if (insomnia.response.code !== 200 || insomnia.response.json().id !== Number(insomnia.environment.get("jugada_id"))) throw new Error("Jugada no recuperada");
+      - name: Confirmar un registro nuevo
+        meta: {id: req_p09_despues_feliz, sortKey: 204}
+        method: GET
+        url: "{{ _.a1_base_url }}/api/lp3/jugadas-cruzadas"
+        scripts:
+          afterResponse: |
+            if (insomnia.response.code !== 200 || insomnia.response.json().length !== Number(insomnia.environment.get("cantidad_previa")) + 1) throw new Error("Cantidad inesperada");
+  - name: 03 — Rechazo de Sofía sin cambios
+    meta: {id: fld_p09_a2, sortKey: 300}
+    children:
+      - name: Snapshot antes del rechazo A2
+        meta: {id: req_p09_antes_a2, sortKey: 301}
+        method: GET
+        url: "{{ _.a1_base_url }}/api/lp3/jugadas-cruzadas"
+        scripts:
+          afterResponse: |
+            if (insomnia.response.code !== 200) throw new Error("No se pudo leer A1");
+            insomnia.environment.set("snapshot_jugadas", JSON.stringify(insomnia.response.json()));
+      - name: Creeper muerto — 409 de A2_SOFIA
+        meta: {id: req_p09_rechazo_a2, sortKey: 302}
+        method: POST
+        url: "{{ _.a1_base_url }}/api/lp3/jugadas-cruzadas"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"creeperSofiaId":"{{ _.creeper_muerto_sofia_id }}","jugadorSofiaId":"{{ _.jugador_sofia_id }}","cerdoSofiaId":"{{ _.cerdo_sofia_id }}","explosivoNicolasId":"{{ _.explosivo_nicolas_id }}"}'
+        scripts:
+          afterResponse: |
+            if (insomnia.response.code !== 409 || insomnia.response.json().proveedor !== "A2_SOFIA") throw new Error("Se esperaba rechazo de Sofía");
+      - name: Confirmar lista idéntica tras rechazo A2
+        meta: {id: req_p09_despues_a2, sortKey: 303}
+        method: GET
+        url: "{{ _.a1_base_url }}/api/lp3/jugadas-cruzadas"
+        scripts:
+          afterResponse: |
+            if (insomnia.response.code !== 200 || JSON.stringify(insomnia.response.json()) !== insomnia.environment.get("snapshot_jugadas")) throw new Error("La base cambió tras rechazo A2");
+  - name: 04 — Sofía acepta pero Nicolás rechaza
+    meta: {id: fld_p09_a3, sortKey: 400}
+    children:
+      - name: Snapshot antes del rechazo A3
+        meta: {id: req_p09_antes_a3, sortKey: 401}
+        method: GET
+        url: "{{ _.a1_base_url }}/api/lp3/jugadas-cruzadas"
+        scripts:
+          afterResponse: |
+            if (insomnia.response.code !== 200) throw new Error("No se pudo leer A1");
+            insomnia.environment.set("snapshot_jugadas", JSON.stringify(insomnia.response.json()));
+      - name: Zombie no explosivo — 409 de A3_NICOLAS
+        meta: {id: req_p09_rechazo_a3, sortKey: 402}
+        method: POST
+        url: "{{ _.a1_base_url }}/api/lp3/jugadas-cruzadas"
+        headers: [{name: Content-Type, value: application/json}]
+        body:
+          mimeType: application/json
+          text: '{"creeperSofiaId":"{{ _.creeper_sofia_id }}","jugadorSofiaId":"{{ _.jugador_sofia_id }}","cerdoSofiaId":"{{ _.cerdo_sofia_id }}","explosivoNicolasId":"{{ _.zombie_nicolas_id }}"}'
+        scripts:
+          afterResponse: |
+            if (insomnia.response.code !== 409 || insomnia.response.json().proveedor !== "A3_NICOLAS") throw new Error("Se esperaba rechazo de Nicolás");
+      - name: Confirmar lista idéntica tras rechazo A3
+        meta: {id: req_p09_despues_a3, sortKey: 403}
+        method: GET
+        url: "{{ _.a1_base_url }}/api/lp3/jugadas-cruzadas"
+        scripts:
+          afterResponse: |
+            if (insomnia.response.code !== 200 || JSON.stringify(insomnia.response.json()) !== insomnia.environment.get("snapshot_jugadas")) throw new Error("La base cambió tras rechazo A3");
+environments:
+  name: Base Environment
+  meta: {id: env_p09_base}
+  data:
+    a1_base_url: http://100.78.121.31:8080
+    a2_base_url: http://100.79.75.27:8081
+    a3_base_url: http://100.83.179.97:8080
+    creeper_sofia_id: ""
+    creeper_muerto_sofia_id: ""
+    jugador_sofia_id: ""
+    cerdo_sofia_id: ""
+    explosivo_nicolas_id: ""
+    zombie_nicolas_id: ""
+    jugada_id: 0
+    cantidad_previa: 0
+    snapshot_jugadas: ""
