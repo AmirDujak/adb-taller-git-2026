@@ -24,6 +24,13 @@ Repositorios:
 - Sofía: https://github.com/Sofia-torres00/st-taller-git-2026
 - Nicolás: https://github.com/NicoRodriguez85677/NRodriguez-taller-git-2026
 
+Commits de los compañeros acordados para esta entrega:
+- Sofía: https://github.com/Sofia-torres00/st-taller-git-2026/commit/06a6fb297a5e9f9186d23b6dee7086fdaba94e30
+- Nicolás: https://github.com/NicoRodriguez85677/NRodriguez-taller-git-2026/commit/e9db16a93c925928734932e2759459a08747a1dd
+
+Su existencia fue verificada en GitHub. Las pruebas HTTP fueron contra los servicios
+accesibles; no se afirma haber clonado y arrancado estos dos commits por separado.
+
 Las tres direcciones son de Tailscale: requieren acceso autorizado a la red y servicios
 encendidos. Amir también puede usar `http://localhost:8080` desde su propia máquina.
 
@@ -67,20 +74,12 @@ Se atendió trasladando reglas, validaciones y excepciones del dominio a service
 Main está en ejemplos de test. El README describe los cambios y pruebas de respaldo.
 No se declara un 24/24 original ni una modificación retroactiva de la nota.
 
-## Información pendiente antes de adjuntar en Classroom
-
-- Confirmar e incorporar los commits exactos publicados que ejecutan Sofía y Nicolás.
-  Los repositorios y direcciones compartidas ya están registrados en el README.
-
 ## Commit de implementación para compartir
 
 https://github.com/AmirDujak/adb-taller-git-2026/commit/d283f6594c9f727499c71332ae2427d5c8868bf0
 
-Ese snapshot incluye código, pruebas, colección y documentación aplicada. El commit
-posterior fija este enlace; todavía deben incorporarse los hashes de los compañeros
-antes de declarar la entrega documental completa.
-
-**Este archivo todavía no es una entrega cerrada mientras existan esos pendientes.**
+Ese snapshot incluye código, pruebas, colección y documentación aplicada. El enlace
+de entrega se actualizará al snapshot que también contiene los hashes de los compañeros.
 El README contiene el detalle de configuración, reglas y límites (sin reservas, daño ni idempotencia).
 
 ## Enunciado y evaluación

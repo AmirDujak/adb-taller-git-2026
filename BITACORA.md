@@ -536,3 +536,22 @@ correcto de su implementación, no el anterior `882fe59` que no contenía POO-09
   El commit de enlace actualiza README y especificaciones para compartir ese hash;
   no cambia el código probado. Resultado de la verificación previa: 142 pruebas Java
   y 32 de scripts aprobadas. Los hashes de compañeros siguen pendientes.
+
+## Entrada 15 — Commits de compañeros confirmados
+
+**Fecha:** 2026-11-23. **Agente:** OpenCode. **Proveedor:** OpenAI.
+**Modelo exacto:** `openai/gpt-6.1-sol` (GPT-6.1 Sol).
+
+**Prompt recibido:** el alumno proporcionó el enlace al commit de Sofía
+`06a6fb297a5e9f9186d23b6dee7086fdaba94e30` y el hash de Nicolás
+`e9db16a93c925928734932e2759459a08747a1dd` para completar la documentación del grupo.
+
+- Se verificó la existencia de ambos commits en sus repositorios mediante la API de GitHub.
+  La primera consulta con Python falló por certificados locales; se usó curl con
+  verificación TLS normal, sin desactivar controles de seguridad ni cambiar configuración.
+- Se reemplazaron los pendientes y marcadores del README y se incorporaron enlaces
+  exactos en las especificaciones POO-09. No se clonó código ajeno ni se copiaron reglas.
+- Esta actualización es exclusivamente documental: no cambia el código previamente
+  probado ni atribuye a estos snapshots una prueba de arranque por clonación no realizada.
+- Se prepara un nuevo snapshot de entrega con los datos del grupo completos; el commit
+  posterior solo fija su enlace. La rama de publicación sigue siendo `feature/markdown`.

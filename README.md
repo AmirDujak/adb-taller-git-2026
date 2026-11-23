@@ -21,10 +21,12 @@ Creepers y no se llama al escenario de orquestación de los compañeros.
   y regresión REST/JPA. El alumno confirmó que esta era **la única observación de POO-08**;
   queda cerrada en el código y documentada para el criterio de corrección de POO-09.
   Esto no cambia retroactivamente la nota de POO-08 ni se declara que obtuvo 24/24.
-- **Pendiente:** confirmar los commits exactos que ejecutan Sofía y Nicolás.
-  Los enlaces POO-08 al final son históricos.
-- Código, pruebas, colección y documentación POO-09 están versionados en el snapshot
-  enlazado más abajo. Falta fijar los commits ajenos para cerrar la entrega reproducible.
+- Los commits de Sofía y Nicolás fueron proporcionados por el alumno y su existencia
+  se verificó en GitHub. Los enlaces POO-08 al final son históricos.
+- Código, pruebas, colección y documentación POO-09 están versionados; el mapa del grupo
+  incluye los tres commits y las instrucciones de arranque. Las pruebas HTTP previas
+  fueron contra los servicios accesibles: no se afirma haber clonado y ejecutado los
+  commits ajenos fijados aquí.
 
 ### Mapa del grupo (Minecraft)
 
@@ -42,16 +44,15 @@ de su propia entrega; los tres README deben identificar las mismas tres bases.
 | Autor | Repositorio | Commit reproducible |
 |---|---|---|
 | Amir | https://github.com/AmirDujak/adb-taller-git-2026 | [d283f6594c9f727499c71332ae2427d5c8868bf0](https://github.com/AmirDujak/adb-taller-git-2026/commit/d283f6594c9f727499c71332ae2427d5c8868bf0) |
-| Sofía | https://github.com/Sofia-torres00/st-taller-git-2026 | Pendiente de confirmar con la autora |
-| Nicolás | https://github.com/NicoRodriguez85677/NRodriguez-taller-git-2026 | Pendiente de confirmar con el autor |
+| Sofía | https://github.com/Sofia-torres00/st-taller-git-2026 | [06a6fb297a5e9f9186d23b6dee7086fdaba94e30](https://github.com/Sofia-torres00/st-taller-git-2026/commit/06a6fb297a5e9f9186d23b6dee7086fdaba94e30) |
+| Nicolás | https://github.com/NicoRodriguez85677/NRodriguez-taller-git-2026 | [e9db16a93c925928734932e2759459a08747a1dd](https://github.com/NicoRodriguez85677/NRodriguez-taller-git-2026/commit/e9db16a93c925928734932e2759459a08747a1dd) |
 
 Swagger UI: [Amir](http://100.78.121.31:8080/swagger-ui/index.html),
 [Sofía](http://100.79.75.27:8081/swagger-ui/index.html),
 [Nicolás](http://100.83.179.97:8080/swagger-ui/index.html).
-Para confirmar los hashes, cada compañero ejecuta `git rev-parse HEAD` y
-`git status --short` en su proyecto. Si hay cambios locales que forman parte del
-servicio, debe publicarlos antes de fijar el commit: el último hash de GitHub por sí
-solo no demuestra qué versión está corriendo en la notebook.
+Estos hashes son los acordados para la entrega. Si un compañero cambia su servicio,
+debe publicar y comunicar el nuevo hash: el último commit de GitHub por sí solo no
+demuestra qué versión está corriendo en la notebook.
 
 | Dueño | Dos reglas publicadas | Regla/operación consumida en mi escenario |
 |---|---|---|
@@ -71,12 +72,12 @@ cada uno usa su repositorio y ejecuta `./mvnw spring-boot:run` en el puerto acor
 Para una sola máquina, usar carpetas separadas, bases separadas y puertos diferentes:
 
 1. **Sofía:** clonar `https://github.com/Sofia-torres00/st-taller-git-2026.git` y entrar
-   en `st-taller-git-2026`. Seleccionar el hash **pendiente de confirmar** con
-   `git switch --detach HASH_SOFIA` y ejecutar
+   en `st-taller-git-2026`. Seleccionar el commit con
+   `git switch --detach 06a6fb297a5e9f9186d23b6dee7086fdaba94e30` y ejecutar
    `./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8081`.
 2. **Nicolás:** clonar `https://github.com/NicoRodriguez85677/NRodriguez-taller-git-2026.git`
-   y entrar en `NRodriguez-taller-git-2026`. Seleccionar el hash **pendiente de confirmar**
-   con `git switch --detach HASH_NICOLAS` y ejecutar
+   y entrar en `NRodriguez-taller-git-2026`. Seleccionar el commit
+   con `git switch --detach e9db16a93c925928734932e2759459a08747a1dd` y ejecutar
    `./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8082`.
 3. **Amir:** clonar `https://github.com/AmirDujak/adb-taller-git-2026.git` y seleccionar
    el snapshot POO-09 con `git switch --detach d283f6594c9f727499c71332ae2427d5c8868bf0`. Ejecutar:
@@ -85,9 +86,8 @@ Para una sola máquina, usar carpetas separadas, bases separadas y puertos difer
 SOFIA_API_BASE_URL=http://localhost:8081 NICOLAS_API_BASE_URL=http://localhost:8082 ./mvnw spring-boot:run
 ```
 
-`HASH_SOFIA` y `HASH_NICOLAS` son marcadores, no hashes reales; reemplazarlos antes de
-ejecutar esos comandos. El arranque de los commits ajenos aún no fue verificado por
-clonación. Actualizar también las tres bases en Insomnia cuando se use el esquema local.
+El arranque de los commits ajenos aún no fue verificado por clonación.
+Actualizar también las tres bases en Insomnia cuando se use el esquema local.
 La colección viene configurada para las tres direcciones Tailscale del mapa. No configurar a los compañeros para que
 la validación invoque de nuevo este escenario. Sus orquestadores propios no se utilizan.
 
@@ -168,9 +168,9 @@ https://github.com/AmirDujak/adb-taller-git-2026/commit/d283f6594c9f727499c71332
 
 Incluye corrección POO-08, OpenAPI, clientes, escenario, pruebas, colección, bitácora
 y especificaciones. El commit posterior solo fija este enlace; el snapshot enlazado
-conserva los pendientes documentales de ese momento. No usar el enlace histórico
-POO-08 como entrega de este challenge. Al recibir los hashes ajenos se actualizará
-la documentación y se podrá fijar un nuevo commit de entrega definitiva.
+conserva los pendientes documentales de ese momento. Los hashes ajenos ya están
+incorporados en esta versión del README; se fijará abajo el snapshot documental
+actualizado. No usar el enlace histórico POO-08 como entrega de este challenge.
 Consigna: [POO-09](https://github.com/alefq/afq-taller-git-2024/blob/main/docs/ejercicio-poo-09-apis-cruzadas-2026-11-16.md).
 
 ---
