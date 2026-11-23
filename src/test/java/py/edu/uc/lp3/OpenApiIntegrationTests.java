@@ -55,7 +55,13 @@ class OpenApiIntegrationTests {
                 }
             }
         });
-        assertThat(operationIds).hasSize(24);
+        assertThat(operationIds).hasSize(27);
+        var jugadas = paths.path("/api/lp3/jugadas-cruzadas").path("post");
+        assertThat(jugadas.path("description").asText()).contains("Sofía", "Nicolás", "No ejecuta daño");
+        assertThat(jugadas.path("responses").has("201")).isTrue();
+        assertThat(jugadas.path("responses").has("409")).isTrue();
+        assertThat(jugadas.path("responses").has("504")).isTrue();
+        assertThat(documento.at("/components/schemas/ErrorCompanero/properties/proveedor").isMissingNode()).isFalse();
         assertThat(documento.at("/components/schemas/EntidadDatos/required").toString())
                 .contains("nombre", "vida", "hitbox", "sonidos", "drop");
         assertThat(documento.at("/components/schemas/ExplosionDatos/properties/creeperId/example").asInt()).isEqualTo(1);
