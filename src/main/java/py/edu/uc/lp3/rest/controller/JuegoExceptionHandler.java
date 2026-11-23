@@ -10,6 +10,11 @@ import py.edu.uc.lp3.exceptions.*;
 
 @RestControllerAdvice
 public class JuegoExceptionHandler {
+    @ExceptionHandler(ValidacionCompaneroException.class)
+    public ResponseEntity<Map<String, String>> companero(ValidacionCompaneroException e) {
+        return ResponseEntity.status(e.getEstado()).body(Map.of("codigo", e.getCodigo(),
+                "proveedor", e.getProveedor(), "error", e.getMessage()));
+    }
     @ExceptionHandler(ConsultaMinecraftException.class)
     public ResponseEntity<Map<String, String>> minecraftRemoto(ConsultaMinecraftException e) {
         return switch (e.getMotivo()) {

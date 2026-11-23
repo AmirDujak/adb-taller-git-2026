@@ -13,6 +13,26 @@ import reactor.netty.http.client.HttpClient;
 public class WebClientConfig {
 
     @Bean
+    public WebClient sofiaWebClient(WebClient.Builder builder,
+            @Value("${poo09.sofia.base-url:http://100.79.75.27:8081}") String baseUrl,
+            @Value("${poo09.connect-timeout:3s}") Duration timeout) {
+        return clienteSinReintentos(builder, baseUrl, timeout);
+    }
+
+    @Bean
+    public WebClient nicolasWebClient(WebClient.Builder builder,
+            @Value("${poo09.nicolas.base-url:http://100.83.179.97:8080}") String baseUrl,
+            @Value("${poo09.connect-timeout:3s}") Duration timeout) {
+        return clienteSinReintentos(builder, baseUrl, timeout);
+    }
+
+    private WebClient clienteSinReintentos(WebClient.Builder builder, String baseUrl, Duration timeout) {
+        return builder.baseUrl(baseUrl).clientConnector(new ReactorClientHttpConnector(HttpClient.create()
+                .disableRetry(true)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Math.toIntExact(timeout.toMillis())))).build();
+    }
+
+    @Bean
     public WebClient minecraftWebClient(WebClient.Builder builder,
             @Value("${minecraft-api.base-url:http://10.40.142.72:8081}") String baseUrl,
             @Value("${minecraft-api.connect-timeout:3s}") Duration connectTimeout) {
