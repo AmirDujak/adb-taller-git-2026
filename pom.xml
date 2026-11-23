@@ -11,8 +11,8 @@
 	<groupId>py.edu.uc.lp3.adb</groupId>
 	<artifactId>adb-taller-git-2026</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>Minecraft - Trabajo práctico LP3</name>
+	<description>API REST de entidades de Minecraft con arquitectura por capas, JPA y H2</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -41,6 +41,15 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webclient</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>3.2.0</version>
 		</dependency>
 
 		<dependency>
