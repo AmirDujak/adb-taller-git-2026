@@ -25,6 +25,127 @@ Las pruebas habituales usan H2 en memoria. Otra prueba abre, cierra y vuelve a a
 una H2 **en archivo temporal** para verificar que las vidas y los subtipos sobreviven
 al reinicio. Ninguna prueba usa ni borra `./data/entidades`.
 
+## OpenAPI y Swagger UI
+
+Con la aplicación iniciada mediante `./mvnw spring-boot:run`:
+
+- **Swagger UI:** http://localhost:8080/swagger-ui.html
+- **OpenAPI JSON:** http://localhost:8080/v3/api-docs
+- **OpenAPI YAML:** http://localhost:8080/v3/api-docs.yaml
+
+Se usa `springdoc-openapi-starter-webmvc-ui` 3.2.0 para Spring Boot 4.
+La documentación incluye todos los endpoints de inicio, CRUD, movimientos,
+demostraciones y explosiones, junto con las rutas de compatibilidad, parámetros,
+ejemplos de entrada, esquemas y respuestas HTTP. `ObjetoService` consume una API
+externa y no expone un endpoint propio.
+
+**Atención:** crear, actualizar, eliminar o ejecutar `/api/lp3/explosiones/simular` desde
+Swagger UI modifica los datos reales de H2; simular una explosión también elimina entidades.
+La operación `previsualizar-integrada` es de solo lectura, aunque usa POST.
+La operación `aplicar-integrada` sí actualiza la salud en el proyecto remoto.
+En producción, proteger estas rutas o deshabilitar la documentación con
+`springdoc.api-docs.enabled=false` y `springdoc.swagger-ui.enabled=false`.
+
+`OpenApiIntegrationTests` verifica la cobertura de los controladores y sus alias,
+los esquemas, los códigos de respuesta y el acceso a Swagger UI y OpenAPI.
+
+### Explosión integrada con el proyecto remoto
+
+`POST /api/lp3/explosiones/previsualizar-integrada` combina un Creeper persistido
+en este proyecto con un jugador y un cerdo del proyecto remoto documentado en
+http://10.40.142.72:8081/swagger-ui/index.html.
+
+```bash
+curl -X POST http://localhost:8080/api/lp3/explosiones/previsualizar-integrada \
+  -H 'Content-Type: application/json' \
+  -d '{"creeperId":1,"jugadorExternoId":"22222222-2222-4222-8222-222222222222","cerdoExternoId":"33333333-3333-4333-8333-333333333333"}'
+```
+
+Reemplazar los IDs de ejemplo por identificadores existentes: `creeperId` es un
+`Long` **local**; los otros dos son UUID **remotos**, distintos y de tipos `JUGADOR`
+y `CERDO`, respectivamente. El Creeper debe estar vivo y tener posición guardada.
+Las coordenadas de los dos proyectos se interpretan como pertenecientes al mismo
+mundo y con la misma unidad de medida; no se realiza una transformación espacial.
+
+La integración reutiliza `EntidadService.buscar()`, `prepararExplosion()`,
+`Posicion.distanciaA()` y `Creeper.calcularDanioExplosion()`. Del proyecto remoto
+adopta la validación de tipos de los participantes y sus UUID distintos, y consulta
+sus datos mediante **WebClient**, usando únicamente `GET /api/entidades/{id}`.
+No llama a `/api/explosiones`, no consume al Creeper, no actualiza salud ni elimina
+entidades en ninguno de los proyectos. No mantiene una transacción de H2 abierta
+mientras espera al servidor remoto.
+
+La respuesta declara `reglasAplicadas: "LOCALES"`: radio de **3 bloques**, daño
+máximo 20 (**40 si está cargado**), reducción lineal redondeada al entero más cercano
+y daño cero en el borde o fuera del radio. No se usa el radio de 6 del proyecto
+remoto ni se asume su fórmula de daño. `danioAplicado` no supera la salud remota;
+`saludEstimada` conserva los decimales y se limita como mínimo a cero. La vida
+remota se consulta en ese momento; el resultado es una estimación, no una reserva
+ni una operación atómica entre servidores.
+
+Configuración en `src/main/resources/application.properties`:
+
+| Propiedad | Valor por defecto |
+|---|---|
+| `minecraft-api.base-url` | `http://10.40.142.72:8081` (sobrescribible con `MINECRAFT_API_BASE_URL`) |
+| `minecraft-api.connect-timeout` | `3s` |
+| `minecraft-api.request-timeout` | `10s` por consulta remota |
+
+Se necesita acceso de red al servidor remoto. Las pruebas usan un servidor HTTP
+local simulado y H2 en memoria, no dependen de esa dirección ni modifican ese proyecto.
+
+Respuestas: **400** cuerpo/UUID/tipos inválidos; **404** participante local o remoto
+inexistente; **409** origen local no apto para explotar; **502** fallo de conexión,
+error HTTP del proveedor o datos remotos inválidos; **504** tiempo de espera remoto
+agotado. Los errores incluyen `codigo` y `error`, sin exponer el cuerpo interno del proveedor.
+
+### Aplicar daño real en el proyecto remoto
+
+`POST /api/lp3/explosiones/aplicar-integrada` acepta el mismo cuerpo que la
+previsualización, pero **modifica la salud persistida del jugador y del cerdo remotos**.
+Ejemplo con los participantes creados durante la integración (verificar que sigan existiendo):
+
+```bash
+curl -X POST http://localhost:8080/api/lp3/explosiones/aplicar-integrada \
+  -H 'Content-Type: application/json' \
+  -d '{"creeperId":25,"jugadorExternoId":"2735f321-8b2e-4475-9f59-d503381df2fe","cerdoExternoId":"8f158269-ade3-40eb-8b81-c722c125a366"}'
+```
+
+Reemplazar `25` por un Creeper local existente, vivo y con posición. La operación
+vuelve a consultar la salud actual: no utiliza una previsualización anterior.
+Primero valida **ambos** participantes; después envía un `PUT /api/entidades/{uuid}`
+por cada entidad que reciba daño, con nombre, tipo, ubicación originales y salud nueva.
+Omite `atributos`: el contrato remoto conserva los que no se informan. La salud se
+limita a cero sin eliminar entidades. El Creeper local **no se consume ni se modifica**.
+
+Con el Creeper en `(0,64,0)`, un cerdo en `(2,64,0)` y salud actual 10, el daño local
+es 7 y un PUT confirmado guarda salud **3**; entonces Swagger remoto también debe
+mostrar 3. Se valida que la respuesta del PUT corresponda al UUID, tipo y salud esperados.
+
+Resultados:
+
+- **200** y `completa: true`: todos confirmados o sin daño que aplicar.
+- **207** y `completa: false`: aplicación incompleta o incierta; se devuelve el resultado
+  de cada participante sin ocultar las escrituras que ya se confirmaron.
+- `CONFIRMADO`: el PUT devolvió la salud esperada, indicada en `saludConfirmada`.
+- `SIN_CAMBIOS`: no se envió PUT porque el daño efectivo era cero; se informa la salud consultada.
+- `NO_CONFIRMADO`: error, timeout o respuesta inválida del PUT; `saludConfirmada` es null.
+- `NO_INTENTADO`: no se envió PUT tras fallar una escritura anterior.
+
+**No hay transacción distribuida ni rollback:** puede actualizarse el jugador y
+fallar el cerdo. Se detienen las escrituras restantes tras un fallo y no se reintenta
+automáticamente (también se desactiva el reintento de conexión de Reactor Netty).
+Un timeout puede ocurrir después de que el servidor haya guardado el cambio: comprobar
+el estado remoto antes de repetir. **Cada nueva petición puede causar daño otra vez**;
+este endpoint no implementa una clave de idempotencia. Sin ETag/control de versión
+en la API remota, una actualización concurrente entre GET y PUT puede sobrescribirse;
+evitar operaciones simultáneas sobre los mismos participantes.
+
+Los errores de validación o consulta **anteriores al primer PUT** conservan los
+códigos 400/404/409/502/504 descritos arriba y no realizan escrituras.
+Las pruebas usan un servidor local simulado para verificar persistencia remota,
+conservación de datos, fallos parciales, timeouts, repetición y ausencia de daño local.
+
 ## Paquetes y capas
 
 Se sigue la organización del [template LP3](https://github.com/alefq/lp3-template-tp),

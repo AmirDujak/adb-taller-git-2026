@@ -3,6 +3,7 @@ package py.edu.uc.lp3.domain;
 import java.util.List;
 import java.util.Objects;
 import java.util.ArrayList;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import org.hibernate.annotations.DiscriminatorFormula;
 import org.hibernate.annotations.Check;
@@ -20,6 +21,9 @@ import py.edu.uc.lp3.exceptions.ExplosionNoPermitidaException;
  * una entidad muerta que sigue moviéndose, etc.).
  */
 @Entity
+@Schema(description = "Entidad del mundo; tipo identifica el subtipo concreto. Los campos adicionales dependen del subtipo.",
+        subTypes = {Creeper.class, Player.class, Zombie.class, Esqueleto.class, Lobo.class,
+                Oveja.class, Aldeano.class, Cerdo.class, ZombiePequeño.class, OtraEntidad.class})
 @Table(name = "entidades")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Check(constraints = "vida >= 0 and dano_base >= 0 and velocidad_movimiento >= 0 "
@@ -157,6 +161,7 @@ public abstract class Entidad implements Movimientos {
         if (this instanceof Creeper creeper) creeper.actualizarCarga(datos.isCargado());
     }
 
+    @Schema(description = "ID asignado por H2; puede ser null en demostraciones", accessMode = Schema.AccessMode.READ_ONLY)
     public Long getId() { return id; }
     public TipoEntidad getTipo() { return tipo != null ? tipo : TipoEntidad.desdeNombre(nombre); }
     public Posicion getPosicion() { return posicion; }

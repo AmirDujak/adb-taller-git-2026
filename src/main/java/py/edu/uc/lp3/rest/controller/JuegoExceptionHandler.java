@@ -10,6 +10,15 @@ import py.edu.uc.lp3.exceptions.*;
 
 @RestControllerAdvice
 public class JuegoExceptionHandler {
+    @ExceptionHandler(ConsultaMinecraftException.class)
+    public ResponseEntity<Map<String, String>> minecraftRemoto(ConsultaMinecraftException e) {
+        return switch (e.getMotivo()) {
+            case NO_ENCONTRADA -> error(HttpStatus.NOT_FOUND, "ENTIDAD_REMOTA_NO_ENCONTRADA", e);
+            case NO_DISPONIBLE -> error(HttpStatus.BAD_GATEWAY, "API_MINECRAFT_NO_DISPONIBLE", e);
+            case TIEMPO_AGOTADO -> error(HttpStatus.GATEWAY_TIMEOUT, "API_MINECRAFT_TIMEOUT", e);
+        };
+    }
+
     private ResponseEntity<Map<String, String>> error(HttpStatus status, String codigo, Exception e) {
         return ResponseEntity.status(status).body(Map.of("codigo", codigo, "error", e.getMessage()));
     }
