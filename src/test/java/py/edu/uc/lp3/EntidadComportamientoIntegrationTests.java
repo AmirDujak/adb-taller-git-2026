@@ -61,7 +61,7 @@ class EntidadComportamientoIntegrationTests {
 
     @ParameterizedTest
     @ValueSource(strings = {"/entidades/comportamientos", "/comportamientos"})
-    void conservaComportamientosPolimorficos(String ruta) throws Exception {
+    void conservaEndpointsDeComportamientos(String ruta) throws Exception {
         mvc.perform(get(ruta)).andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].tipo").value("Zombie"))
                 .andExpect(jsonPath("$[1].tipo").value("Aldeano"));

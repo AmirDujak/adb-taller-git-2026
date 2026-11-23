@@ -17,9 +17,6 @@ public class Aldeano extends NoHostiles {
         super("Aldeano", 20, new Hitbox(0.6, 1.95, 0.6),
                 List.of("murmullo", "no_no"), List.of("esmeraldas"),
                 0.5);
-        if (profesion == null || profesion.isBlank()) {
-            throw new py.edu.uc.lp3.exceptions.EstadoEntidadInvalidoException("El aldeano necesita una profesión");
-        }
         this.profesion = profesion;
     }
 
@@ -27,8 +24,4 @@ public class Aldeano extends NoHostiles {
         return profesion;
     }
 
-    @Override
-    protected String interactuar() {
-        return getNombre() + " (" + profesion + ") abre su menú de comercio.";
-    }
 }

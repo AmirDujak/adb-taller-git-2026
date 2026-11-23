@@ -28,9 +28,6 @@ public abstract class Hostiles extends Entidad {
                         List<String> sonidos, List<String> drop,
                         double velocidadMovimiento, int danoBase, double rangoDeAggro) {
         super(nombre, vida, hitbox, sonidos, drop, velocidadMovimiento, danoBase);
-        if (!Double.isFinite(rangoDeAggro) || rangoDeAggro <= 0) {
-            throw new py.edu.uc.lp3.exceptions.EstadoEntidadInvalidoException("El rango de aggro debe ser finito y positivo");
-        }
         this.rangoDeAggro = rangoDeAggro;
     }
 
@@ -38,23 +35,4 @@ public abstract class Hostiles extends Entidad {
         return rangoDeAggro;
     }
 
-    /** Devuelve true si el objetivo está dentro del rango de aggro. */
-    public boolean detecta(double distanciaAlJugador) {
-        if (!Double.isFinite(distanciaAlJugador) || distanciaAlJugador < 0) {
-            throw new py.edu.uc.lp3.exceptions.EstadoEntidadInvalidoException("La distancia debe ser finita y no negativa");
-        }
-        return distanciaAlJugador <= rangoDeAggro;
-    }
-
-    /** Un mob hostil, cuando se activa, ataca. Las subclases pueden redefinirlo (por ejemplo, un Zombie puede no ser hostil). */
-    @Override
-    public String comportamiento() {
-        return isViva() ? accionDeAtaque() : getNombre() + " ya desapareció.";
-    }
-
-    /**
-     * Acción de ataque: cada mob hostil define cómo ataca
-     * (mordisco, flecha, explosión, etc.).
-     */
-    protected abstract String accionDeAtaque();
 }

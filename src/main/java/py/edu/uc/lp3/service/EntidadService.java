@@ -7,6 +7,7 @@ import py.edu.uc.lp3.rest.dto.EntidadDatos;
 
 /** Contrato de las operaciones de negocio del CRUD de entidades. */
 public interface EntidadService {
+    java.util.List<java.util.Map<String, Object>> movimientos();
 
     List<Entidad> listar();
 

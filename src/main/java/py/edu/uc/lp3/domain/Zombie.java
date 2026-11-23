@@ -33,19 +33,4 @@ public class Zombie extends Hostiles {
         return hostilidad;
     }
 
-    @Override
-    public String comportamiento() {
-        if (!isViva()) {
-            return getNombre() + " ya desapareció.";
-        }
-        if (hostilidad) {
-            return accionDeAtaque();
-        }
-        return getNombre() + " deambula sin atacar.";
-    }
-
-    @Override
-    protected String accionDeAtaque() {
-        return getNombre() + " golpea cuerpo a cuerpo al jugador.";
-    }
 }

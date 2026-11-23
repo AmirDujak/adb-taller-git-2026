@@ -14,15 +14,18 @@ import py.edu.uc.lp3.rest.dto.ExplosionResultado;
 import py.edu.uc.lp3.rest.dto.ExplosionResultado.EstadoCreeper;
 import py.edu.uc.lp3.rest.dto.ExplosionResultado.EstadoObjetivo;
 import py.edu.uc.lp3.service.ExplosionService;
+import py.edu.uc.lp3.service.ReglasJuegoService;
 
 /** Aplica atómicamente la explosión sobre las entidades y posiciones persistidas. */
 @Service
 public class ExplosionServiceImpl implements ExplosionService {
 
     private final EntidadRepository repository;
+    private final ReglasJuegoService reglas;
 
-    public ExplosionServiceImpl(EntidadRepository repository) {
+    public ExplosionServiceImpl(EntidadRepository repository, ReglasJuegoService reglas) {
         this.repository = repository;
+        this.reglas = reglas;
     }
 
     @Override
@@ -35,18 +38,18 @@ public class ExplosionServiceImpl implements ExplosionService {
         Entidad origen = entidades.stream()
                 .filter(e -> e.getId().equals(datos.creeperId())).findFirst()
                 .orElseThrow(() -> new EntidadNoEncontradaException(datos.creeperId()));
-        Creeper creeper = origen.prepararExplosion();
+        Creeper creeper = reglas.prepararExplosion(origen);
         List<EstadoObjetivo> objetivos = new ArrayList<>();
         for (Entidad objetivo : entidades) {
             if (objetivo.getId().equals(origen.getId()) || objetivo.getPosicion() == null) {
                 continue;
             }
-            double distancia = origen.getPosicion().distanciaA(objetivo.getPosicion());
-            if (distancia > Creeper.RADIO_EXPLOSION) {
+            double distancia = reglas.distancia(origen.getPosicion(), objetivo.getPosicion());
+            if (distancia > ReglasJuegoService.RADIO_EXPLOSION) {
                 continue;
             }
             int vidaInicial = objetivo.getVida();
-            objetivo.recibirDanio(creeper.calcularDanioExplosion(distancia));
+            reglas.recibirDanio(objetivo, reglas.calcularDanioExplosion(creeper, distancia));
             int dano = vidaInicial - objetivo.getVida();
             boolean eliminado = objetivo.getVida() == 0;
             objetivos.add(new EstadoObjetivo(objetivo.getId(), objetivo.getNombre(), distancia,
@@ -56,10 +59,10 @@ public class ExplosionServiceImpl implements ExplosionService {
             }
             // Hibernate guarda por dirty checking la vida de los supervivientes al confirmar.
         }
-        String mensaje = creeper.comportamiento();
-        origen.recibirDanio(origen.getVida());
+        String mensaje = reglas.comportamiento(creeper);
+        reglas.recibirDanio(origen, origen.getVida());
         repository.delete(origen);
-        return new ExplosionResultado(Creeper.RADIO_EXPLOSION,
+        return new ExplosionResultado(ReglasJuegoService.RADIO_EXPLOSION,
                 new EstadoCreeper(origen.getId(), origen.isCargado(), 0, true, mensaje),
                 List.copyOf(objetivos));
     }

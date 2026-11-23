@@ -25,9 +25,9 @@ class ExplosionIntegradaServiceTests {
         var entidades = mock(EntidadService.class);
         var remotas = mock(EntidadRemotaService.class);
         var creeper = new Creeper();
-        creeper.recibirDanio(20);
+        creeper.setVida(0);
         when(entidades.buscar(1L)).thenReturn(creeper);
-        var servicio = new ExplosionIntegradaServiceImpl(entidades, remotas);
+        var servicio = new ExplosionIntegradaServiceImpl(entidades, remotas, new py.edu.uc.lp3.service.ReglasJuegoService());
 
         assertThrows(ExplosionNoPermitidaException.class, () -> servicio.previsualizar(
                 new ExplosionIntegradaDatos(1L, UUID.randomUUID(), UUID.randomUUID())));

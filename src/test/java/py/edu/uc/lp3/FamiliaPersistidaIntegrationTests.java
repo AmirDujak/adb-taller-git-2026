@@ -84,12 +84,12 @@ class FamiliaPersistidaIntegrationTests {
     }
 
     @Test
-    void jpaNoGuardaUnaEntidadRetiradaSinPasarPorElService() {
+    void restriccionesSqlSiguenProtegiendoValoresNegativosSinCallbacksDeNegocio() {
         Player retirado = new Player();
-        retirado.retirarDelMundo();
+        retirado.setVida(-1);
         var transaction = new TransactionTemplate(transactionManager);
         assertThatThrownBy(() -> transaction.executeWithoutResult(status -> repository.saveAndFlush(retirado)))
-                .hasStackTraceContaining("La vida inicial debe ser positiva");
+                .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
         assertThat(repository.count()).isZero();
     }
 

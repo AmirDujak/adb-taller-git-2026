@@ -12,14 +12,17 @@ import py.edu.uc.lp3.exceptions.EntidadNoEncontradaException;
 import py.edu.uc.lp3.repository.EntidadRepository;
 import py.edu.uc.lp3.rest.dto.EntidadDatos;
 import py.edu.uc.lp3.service.EntidadService;
+import py.edu.uc.lp3.service.ReglasJuegoService;
 
 @Service
 @Transactional(readOnly = true)
 public class EntidadServiceImpl implements EntidadService {
     private final EntidadRepository repository;
+    private final ReglasJuegoService reglas;
 
-    public EntidadServiceImpl(EntidadRepository repository) {
+    public EntidadServiceImpl(EntidadRepository repository, ReglasJuegoService reglas) {
         this.repository = repository;
+        this.reglas = reglas;
     }
 
     @Override
@@ -27,6 +30,15 @@ public class EntidadServiceImpl implements EntidadService {
         List<Entidad> entidades = repository.findAll();
         entidades.forEach(this::cargarColecciones);
         return entidades;
+    }
+
+    @Override
+    public List<java.util.Map<String, Object>> movimientos() {
+        return listar().stream().map(entidad -> {
+            var movimientos = reglas.movimientos(entidad);
+            return java.util.Map.<String, Object>of("id", entidad.getId(), "tipo", entidad.getTipo(),
+                    "avanzar", movimientos.avanzar(), "saltar", movimientos.saltar());
+        }).toList();
     }
 
     @Override
@@ -47,7 +59,10 @@ public class EntidadServiceImpl implements EntidadService {
     @Transactional
     public Entidad actualizar(Long id, EntidadDatos datos) {
         Entidad existente = buscar(id);
-        existente.actualizarDesde(construir(datos, existente));
+        Entidad nuevoEstado = construir(datos, existente);
+        if (existente.getTipo() != nuevoEstado.getTipo())
+            throw new EstadoEntidadInvalidoException("No se puede cambiar el subtipo de una entidad existente");
+        existente.actualizarDesde(nuevoEstado);
         return existente;
     }
 
@@ -55,11 +70,11 @@ public class EntidadServiceImpl implements EntidadService {
     @Transactional
     public void eliminar(Long id) {
         Entidad entidad = buscar(id);
-        entidad.retirarDelMundo();
+        reglas.retirarDelMundo(entidad);
         repository.delete(entidad);
     }
 
-    /** Solo adapta ausencia de datos JSON; las reglas numéricas viven en el dominio. */
+    /** Entrada validada por servicios antes de construir o modificar estado persistido. */
     private Entidad construir(EntidadDatos datos, Entidad existente) {
         if (datos == null || datos.nombre() == null || datos.vida() == null
                 || datos.danoBase() == null || datos.velocidadMovimiento() == null
@@ -79,7 +94,7 @@ public class EntidadServiceImpl implements EntidadService {
             posicion = new Posicion(p.x(), p.y(), p.z());
         }
         var h = datos.hitbox();
-        return Entidad.crear(datos.nombre(), datos.vida(), datos.danoBase(), datos.velocidadMovimiento(),
+        return reglas.crear(datos.nombre(), datos.vida(), datos.danoBase(), datos.velocidadMovimiento(),
                 new Hitbox(h.ancho(), h.alto(), h.profundidad()), datos.sonidos(), datos.drop(),
                 tipo, cargado, posicion);
     }

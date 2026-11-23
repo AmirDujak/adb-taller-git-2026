@@ -10,8 +10,4 @@ public class OtraEntidad extends Entidad {
         super("Otra", 20, new Hitbox(1, 1, 1), List.of(), List.of(), 1);
     }
 
-    @Override
-    public String comportamiento() {
-        return getNombre() + " recorre el mundo.";
-    }
 }

@@ -33,31 +33,4 @@ public class Esqueleto extends Hostiles {
         return usaArco;
     }
 
-    /** Dispara su ataque a distancia por defecto. */
-    public String disparar() {
-        if (!isViva()) {
-            return getNombre() + " ya desapareció.";
-        }
-        return getNombre() + " dispara una flecha" + (usaArco ? " con arco" : "") + ".";
-    }
-
-    /**
-     * Dispara a una distancia dada.
-     * @param distancia bloques hasta el objetivo (no puede ser negativa)
-     */
-    public String disparar(int distancia) {
-        if (distancia < 0) {
-            throw new py.edu.uc.lp3.exceptions.EstadoEntidadInvalidoException("La distancia no puede ser negativa");
-        }
-        if (!isViva()) {
-            return getNombre() + " ya desapareció.";
-        }
-        return getNombre() + " dispara una flecha a " + distancia + " bloques"
-                + (usaArco ? " con arco" : "") + ".";
-    }
-
-    @Override
-    protected String accionDeAtaque() {
-        return getNombre() + " dispara una flecha a distancia.";
-    }
 }

@@ -19,10 +19,6 @@ public class Hitbox {
     }
 
     public Hitbox(double ancho, double alto, double profundidad) {
-        if (!Double.isFinite(ancho) || !Double.isFinite(alto) || !Double.isFinite(profundidad)
-                || ancho <= 0 || alto <= 0 || profundidad <= 0) {
-            throw new py.edu.uc.lp3.exceptions.EstadoEntidadInvalidoException("Las dimensiones de la hitbox deben ser finitas y positivas");
-        }
         this.ancho = ancho;
         this.alto = alto;
         this.profundidad = profundidad;
