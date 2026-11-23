@@ -43,7 +43,7 @@ de su propia entrega; los tres README deben identificar las mismas tres bases.
 
 | Autor | Repositorio | Commit reproducible |
 |---|---|---|
-| Amir | https://github.com/AmirDujak/adb-taller-git-2026 | [d283f6594c9f727499c71332ae2427d5c8868bf0](https://github.com/AmirDujak/adb-taller-git-2026/commit/d283f6594c9f727499c71332ae2427d5c8868bf0) |
+| Amir | https://github.com/AmirDujak/adb-taller-git-2026 | [a6e6b14a3626f1cf6cfa48547fb4b1d5596a03fb](https://github.com/AmirDujak/adb-taller-git-2026/commit/a6e6b14a3626f1cf6cfa48547fb4b1d5596a03fb) |
 | Sofía | https://github.com/Sofia-torres00/st-taller-git-2026 | [06a6fb297a5e9f9186d23b6dee7086fdaba94e30](https://github.com/Sofia-torres00/st-taller-git-2026/commit/06a6fb297a5e9f9186d23b6dee7086fdaba94e30) |
 | Nicolás | https://github.com/NicoRodriguez85677/NRodriguez-taller-git-2026 | [e9db16a93c925928734932e2759459a08747a1dd](https://github.com/NicoRodriguez85677/NRodriguez-taller-git-2026/commit/e9db16a93c925928734932e2759459a08747a1dd) |
 
@@ -80,7 +80,7 @@ Para una sola máquina, usar carpetas separadas, bases separadas y puertos difer
    con `git switch --detach e9db16a93c925928734932e2759459a08747a1dd` y ejecutar
    `./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8082`.
 3. **Amir:** clonar `https://github.com/AmirDujak/adb-taller-git-2026.git` y seleccionar
-   el snapshot POO-09 con `git switch --detach d283f6594c9f727499c71332ae2427d5c8868bf0`. Ejecutar:
+   el snapshot POO-09 con `git switch --detach a6e6b14a3626f1cf6cfa48547fb4b1d5596a03fb`. Ejecutar:
 
 ```bash
 SOFIA_API_BASE_URL=http://localhost:8081 NICOLAS_API_BASE_URL=http://localhost:8082 ./mvnw spring-boot:run
@@ -163,14 +163,13 @@ inválido, HTTP inesperado, timeouts, entrada inválida, rollback y persistencia
 No usan `./data/entidades`. El documento para Classroom está en
 [`docs/ESPECIFICACIONES-POO09.md`](docs/ESPECIFICACIONES-POO09.md).
 
-**Commit de implementación POO-09 para compartir con el grupo:**
-https://github.com/AmirDujak/adb-taller-git-2026/commit/d283f6594c9f727499c71332ae2427d5c8868bf0
+**Commit de solución POO-09 con los hashes de compañeros incorporados:**
+https://github.com/AmirDujak/adb-taller-git-2026/commit/a6e6b14a3626f1cf6cfa48547fb4b1d5596a03fb
 
 Incluye corrección POO-08, OpenAPI, clientes, escenario, pruebas, colección, bitácora
-y especificaciones. El commit posterior solo fija este enlace; el snapshot enlazado
-conserva los pendientes documentales de ese momento. Los hashes ajenos ya están
-incorporados en esta versión del README; se fijará abajo el snapshot documental
-actualizado. No usar el enlace histórico POO-08 como entrega de este challenge.
+y especificaciones, junto con los commits exactos de Sofía y Nicolás. El commit
+posterior solo fija este enlace y las instrucciones para seleccionar ese snapshot;
+no cambia la implementación. No usar el enlace histórico POO-08 como entrega de este challenge.
 Consigna: [POO-09](https://github.com/alefq/afq-taller-git-2024/blob/main/docs/ejercicio-poo-09-apis-cruzadas-2026-11-16.md).
 
 ---

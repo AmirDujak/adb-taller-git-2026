@@ -555,3 +555,6 @@ correcto de su implementación, no el anterior `882fe59` que no contenía POO-09
   probado ni atribuye a estos snapshots una prueba de arranque por clonación no realizada.
 - Se prepara un nuevo snapshot de entrega con los datos del grupo completos; el commit
   posterior solo fija su enlace. La rama de publicación sigue siendo `feature/markdown`.
+- Snapshot de solución con hashes del grupo incorporados:
+  `a6e6b14a3626f1cf6cfa48547fb4b1d5596a03fb`. Se fija este enlace en README y
+  especificaciones mediante un commit posterior exclusivamente documental.

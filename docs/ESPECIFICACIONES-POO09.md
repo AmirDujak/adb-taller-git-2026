@@ -74,12 +74,12 @@ Se atendió trasladando reglas, validaciones y excepciones del dominio a service
 Main está en ejemplos de test. El README describe los cambios y pruebas de respaldo.
 No se declara un 24/24 original ni una modificación retroactiva de la nota.
 
-## Commit de implementación para compartir
+## Commit de solución para Classroom
 
-https://github.com/AmirDujak/adb-taller-git-2026/commit/d283f6594c9f727499c71332ae2427d5c8868bf0
+https://github.com/AmirDujak/adb-taller-git-2026/commit/a6e6b14a3626f1cf6cfa48547fb4b1d5596a03fb
 
-Ese snapshot incluye código, pruebas, colección y documentación aplicada. El enlace
-de entrega se actualizará al snapshot que también contiene los hashes de los compañeros.
+Ese snapshot incluye código, pruebas, colección, documentación aplicada y hashes de
+los compañeros. El commit posterior solo fija este enlace, sin cambiar la implementación.
 El README contiene el detalle de configuración, reglas y límites (sin reservas, daño ni idempotencia).
 
 ## Enunciado y evaluación
