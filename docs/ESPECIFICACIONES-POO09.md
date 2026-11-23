@@ -71,8 +71,14 @@ No se declara un 24/24 original ni una modificación retroactiva de la nota.
 
 - Confirmar e incorporar los commits exactos publicados que ejecutan Sofía y Nicolás.
   Los repositorios y direcciones compartidas ya están registrados en el README.
-- Publicar los cambios y reemplazar este pendiente con el enlace exacto:
-  `https://github.com/AmirDujak/adb-taller-git-2026/commit/HASH_FINAL_POO09`.
+
+## Commit de implementación para compartir
+
+https://github.com/AmirDujak/adb-taller-git-2026/commit/d283f6594c9f727499c71332ae2427d5c8868bf0
+
+Ese snapshot incluye código, pruebas, colección y documentación aplicada. El commit
+posterior fija este enlace; todavía deben incorporarse los hashes de los compañeros
+antes de declarar la entrega documental completa.
 
 **Este archivo todavía no es una entrega cerrada mientras existan esos pendientes.**
 El README contiene el detalle de configuración, reglas y límites (sin reservas, daño ni idempotencia).

@@ -21,10 +21,10 @@ Creepers y no se llama al escenario de orquestación de los compañeros.
   y regresión REST/JPA. El alumno confirmó que esta era **la única observación de POO-08**;
   queda cerrada en el código y documentada para el criterio de corrección de POO-09.
   Esto no cambia retroactivamente la nota de POO-08 ni se declara que obtuvo 24/24.
-- **Pendiente:** confirmar los commits exactos que ejecutan Sofía y Nicolás y publicar
-  el commit final de esta entrega. Los enlaces POO-08 al final son históricos.
-- Código, pruebas y colección POO-09 implementados. La publicación y el cierre de los
-  datos anteriores todavía son necesarios: este README no declara la entrega completa.
+- **Pendiente:** confirmar los commits exactos que ejecutan Sofía y Nicolás.
+  Los enlaces POO-08 al final son históricos.
+- Código, pruebas, colección y documentación POO-09 están versionados en el snapshot
+  enlazado más abajo. Falta fijar los commits ajenos para cerrar la entrega reproducible.
 
 ### Mapa del grupo (Minecraft)
 
@@ -41,7 +41,7 @@ de su propia entrega; los tres README deben identificar las mismas tres bases.
 
 | Autor | Repositorio | Commit reproducible |
 |---|---|---|
-| Amir | https://github.com/AmirDujak/adb-taller-git-2026 | POO-09 pendiente de publicar |
+| Amir | https://github.com/AmirDujak/adb-taller-git-2026 | [d283f6594c9f727499c71332ae2427d5c8868bf0](https://github.com/AmirDujak/adb-taller-git-2026/commit/d283f6594c9f727499c71332ae2427d5c8868bf0) |
 | Sofía | https://github.com/Sofia-torres00/st-taller-git-2026 | Pendiente de confirmar con la autora |
 | Nicolás | https://github.com/NicoRodriguez85677/NRodriguez-taller-git-2026 | Pendiente de confirmar con el autor |
 
@@ -79,7 +79,7 @@ Para una sola máquina, usar carpetas separadas, bases separadas y puertos difer
    con `git switch --detach HASH_NICOLAS` y ejecutar
    `./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8082`.
 3. **Amir:** clonar `https://github.com/AmirDujak/adb-taller-git-2026.git` y seleccionar
-   el commit final POO-09, **pendiente de publicar**. Ejecutar:
+   el snapshot POO-09 con `git switch --detach d283f6594c9f727499c71332ae2427d5c8868bf0`. Ejecutar:
 
 ```bash
 SOFIA_API_BASE_URL=http://localhost:8081 NICOLAS_API_BASE_URL=http://localhost:8082 ./mvnw spring-boot:run
@@ -163,8 +163,15 @@ inválido, HTTP inesperado, timeouts, entrada inválida, rollback y persistencia
 No usan `./data/entidades`. El documento para Classroom está en
 [`docs/ESPECIFICACIONES-POO09.md`](docs/ESPECIFICACIONES-POO09.md).
 
-**Commit final POO-09: pendiente de publicar.** No usar el enlace histórico POO-08 como
-entrega de este challenge. Consigna: [POO-09](https://github.com/alefq/afq-taller-git-2024/blob/main/docs/ejercicio-poo-09-apis-cruzadas-2026-11-16.md).
+**Commit de implementación POO-09 para compartir con el grupo:**
+https://github.com/AmirDujak/adb-taller-git-2026/commit/d283f6594c9f727499c71332ae2427d5c8868bf0
+
+Incluye corrección POO-08, OpenAPI, clientes, escenario, pruebas, colección, bitácora
+y especificaciones. El commit posterior solo fija este enlace; el snapshot enlazado
+conserva los pendientes documentales de ese momento. No usar el enlace histórico
+POO-08 como entrega de este challenge. Al recibir los hashes ajenos se actualizará
+la documentación y se podrá fijar un nuevo commit de entrega definitiva.
+Consigna: [POO-09](https://github.com/alefq/afq-taller-git-2024/blob/main/docs/ejercicio-poo-09-apis-cruzadas-2026-11-16.md).
 
 ---
 

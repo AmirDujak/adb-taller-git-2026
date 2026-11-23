@@ -532,3 +532,7 @@ correcto de su implementación, no el anterior `882fe59` que no contenía POO-09
 - Se prepara un snapshot con README, bitácora y especificaciones aplicadas; un commit
   posterior únicamente fija el enlace a ese snapshot, evitando un hash autorreferente.
   No se hace merge ni push forzado; se publica la rama de trabajo existente.
+- Snapshot de implementación con todos los archivos: `d283f6594c9f727499c71332ae2427d5c8868bf0`.
+  El commit de enlace actualiza README y especificaciones para compartir ese hash;
+  no cambia el código probado. Resultado de la verificación previa: 142 pruebas Java
+  y 32 de scripts aprobadas. Los hashes de compañeros siguen pendientes.
