@@ -18,15 +18,4 @@ public abstract class NoHostiles extends Entidad {
         super(nombre, vida, hitbox, sonidos, drop, velocidadMovimiento);
     }
 
-    /** Un mob pacífico, cuando se activa, interactúa con el jugador. */
-    @Override
-    public final String comportamiento() {
-        return isViva() ? interactuar() : getNombre() + " ya desapareció.";
-    }
-
-    /**
-     * Interacción con el jugador: cada mob no hostil define la suya
-     * (esquilar una oveja, comerciar con un aldeano, etc.).
-     */
-    protected abstract String interactuar();
 }

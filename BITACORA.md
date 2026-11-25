@@ -413,3 +413,148 @@ después del diagnóstico indicó «Hazlo» para corregir y volver a publicar.
   en Node.js y la respuesta emulada con `code` numérico y `status` textual real
   del transporte. Se repitió el GET del Player tras reiniciar y conservó vida 7.
   No se afirma haber ejecutado la interfaz gráfica o el motor real de Insomnia.
+
+## Entrada 11 — POO-09: contratos, escenario y pruebas de APIs cruzadas
+
+**Fecha:** 2026-11-23. **Agente:** OpenCode. **Proveedor:** OpenAI.
+**Modelo exacto:** `openai/gpt-6.1-sol` (GPT-6.1 Sol).
+
+**Prompts y decisiones:** el alumno pidió comparar su repositorio con POO-09, identificó
+a Sofía Torres y Nicolás Rodriguez como compañeros, pidió revisar sus OpenAPI tras
+reinicios y acordó implementar el plan con «Hazlo». Se propuso a Sofía publicar
+`POST /api/explosiones/validar` sin efectos secundarios; tras verificar su publicación
+se usó ese contrato, no código fuente de compañeros.
+
+- Se releyó el enunciado oficial; los roles en esta entrega son Amir A1, Sofía A2 y Nicolás A3.
+- Se reutilizaron WebClient, H2, JPA y OpenAPI previamente incorporados. El estado inicial
+  de esta implementación era el commit `882fe59` («previo POO-09»), sin cambios locales.
+- Se agregaron clientes independientes configurables, con timeouts y sin reintentos,
+  comprobación de booleanos e IDs y errores atribuidos al proveedor.
+- El escenario guarda una operación **autorizada**, no daño ejecutado. Los explosivos
+  de los proveedores son independientes. Sofía se consulta antes de Nicolás; se escribe
+  recién después de ambas aprobaciones, dentro de una transacción local corta.
+- Se agregó la entidad/repo de jugadas y POST/GET; los rechazos no insertan auditorías.
+  Se conservan las funcionalidades anteriores y se amplió la descripción OpenAPI de las reglas.
+- Se agregaron pruebas con dos servidores HTTP simulados, incluyendo rollback después
+  del INSERT. Se extendió la prueba de cierre/reapertura de H2 con una jugada fixture.
+- Se preparó `insomnia/poo09.yaml`, con creación de participantes e IDs automáticos,
+  feliz y rechazos de ambos, y pruebas Node de sus scripts. La preparación de esa
+  colección sí escribe datos nuevos en los compañeros; el escenario no lo hace.
+- Verificación real con A1 en puerto 18090 y H2 en archivo temporal: 201 y GET exitosos,
+  rechazo de Sofía por Creeper muerto y rechazo de Nicolás por Zombie, ambos 409 atribuidos
+  y con la lista completa local sin cambios. Se reutilizaron participantes existentes:
+  no se crearon, dañaron ni actualizaron entidades de compañeros. Captura en
+  `insomnia/poo09-respuestas-reales.json`. No se ejecutó la GUI de Insomnia.
+- Se redactó el archivo aplicado POO-09 y README. Quedan explícitamente pendientes la
+  corrección/nota POO-08, repositorios/commits de compañeros, URL compartible de A1 y
+  publicación del commit final. No se inventaron resultados ni enlaces de entrega.
+- Resultado final: **140 pruebas Maven y 32 pruebas Node aprobadas**, sin fallos.
+  Se reinició también la instancia temporal real y el GET recuperó la misma jugada
+  con la misma fecha, confirmando persistencia. Se detuvo esa instancia al terminar;
+  no se dejó un servicio adicional ni se modificó la base habitual del alumno.
+
+## Entrada 12 — Cierre de observación POO-08: dominio solo con estado
+
+**Fecha:** 2026-11-23. **Agente:** OpenCode. **Proveedor:** OpenAI.
+**Modelo exacto:** `openai/gpt-6.1-sol` (GPT-6.1 Sol).
+
+**Prompt recibido:** el alumno compartió la corrección de «Organización en paquetes —
+2 de 3»: el dominio no debe lanzar excepciones ni contener reglas de negocio; las
+validaciones y reglas deben quedar exclusivamente en service. También se sugirió sacar
+Main de domain, sin descuento adicional. Esto reemplaza el pendiente de conocer esa
+observación, pero no permite inferir el puntaje global ni otras partes de la corrección.
+
+- Se retiraron validaciones/excepciones de constructores, fábrica y callbacks JPA de
+  Entidad, Hostiles, Creeper, Aldeano, Esqueleto, Hitbox, Posicion y los otros tipos que
+  aún las contenían (TipoEntidad, ZombiePequeño y la nueva JugadaCruzada).
+- Se trasladaron daño, radio/carga, precondiciones de explosión, distancia, detección,
+  movimiento y comportamientos a `ReglasJuegoService`. Los services CRUD y explosión
+  validan y coordinan usando esa capa; las entidades tienen estado, accesores y mapeo.
+- Se creó `DemostracionService` para que las rutas históricas tampoco construyan estados
+  sin validar ni ejecuten reglas en el controller. Movimientos es implementado por un
+  adaptador de servicio, no por la Entity. Se mantiene herencia y esquema JPA existente.
+- Se preservan restricciones SQL de integridad, no callbacks de validación de negocio.
+  Se corrigió la asignación del discriminador del ZombiePequeño sin depender de callbacks.
+- Main se conservó como ejemplo en `src/test/java/py/edu/uc/lp3/demo/Main.java`.
+- Las pruebas unitarias de reglas se movieron a service y siguen comprobando fórmulas,
+  límites, vida no negativa y errores. Se agregó `ArquitecturaDominioTests` para detectar
+  dependencias a excepciones/services, callbacks de validación o reglas dentro de domain.
+- `./mvnw clean test`: **142 pruebas aprobadas**, 0 fallos/errores/omitidas.
+  `node --test insomnia/tests/*.test.cjs`: **32 aprobadas**.
+- Verificación HTTP adicional en una H2 temporal: CRUD 201, vida cero 400, origen Player
+  409, explosión 200 y superviviente con vida 7; demo de Aldeano con profesión válida
+  200 e inválida 400. También se repitieron éxito y ambos rechazos POO-09 contra las
+  APIs reales: 201/409/409 y lista sin cambios tras rechazos. No hubo escrituras remotas
+  ni cambios en `data/entidades`. Se detuvo el servidor temporal al terminar.
+- README, diagrama y especificaciones fueron actualizados para no seguir afirmando
+  que las reglas viven en el dominio. Falta confirmar si el documento completo tiene
+  más observaciones antes de declarar cerrados los 3 puntos de corrección.
+
+## Entrada 13 — Datos confirmados del grupo y cierre de POO-08
+
+**Fecha:** 2026-11-23. **Agente:** OpenCode. **Proveedor:** OpenAI.
+**Modelo exacto:** `openai/gpt-6.1-sol` (GPT-6.1 Sol).
+
+**Prompts recibidos:** el alumno proporcionó los repositorios GitHub de Sofía y Nicolás,
+las tres URLs de Swagger UI sobre Tailscale y confirmó «Sí, era lo único. Hazlo» respecto
+a la observación de POO-08. Se incorporan esos datos sin inferir commits en ejecución.
+
+- A1 compartible: `http://100.78.121.31:8080`; A2 Sofía:
+  `http://100.79.75.27:8081`; A3 Nicolás: `http://100.83.179.97:8080`.
+- Repositorios: `Sofia-torres00/st-taller-git-2026` y
+  `NicoRodriguez85677/NRodriguez-taller-git-2026`, ambos en GitHub.
+- README y especificaciones POO-09 registran que la única observación recibida ya fue
+  atendida y no hay otras pendientes según confirmación del alumno. No se inventa la
+  nota global de POO-08 ni se afirma 24/24 original.
+- Se actualizó `a1_base_url` de `insomnia/poo09.yaml` a la IP de Tailscale confirmada;
+  `localhost:8080` sigue documentado como alternativa local.
+- Los hashes de los compañeros siguen pendientes de confirmación con cada autor:
+  no se equipara el HEAD publicado con el proceso ejecutado. Se documentaron repositorios,
+  carpetas, puertos y cómo seleccionar los hashes cuando estén disponibles.
+- No se crearon commits ni se hizo push. La publicación final sigue pendiente.
+
+## Entrada 14 — Versionado de la solución para compartir con el grupo
+
+**Fecha:** 2026-11-23. **Agente:** OpenCode. **Proveedor:** OpenAI.
+**Modelo exacto:** `openai/gpt-6.1-sol` (GPT-6.1 Sol).
+
+**Prompt recibido:** el alumno pidió crear los commits, publicarlos y pasarle el hash
+correcto de su implementación, no el anterior `882fe59` que no contenía POO-09.
+
+- Se verificó la rama actual `feature/markdown` y su remoto `origin`, sin modificar main
+  ni reescribir historial. Se consultó el remoto con fetch antes de publicar.
+- Se separaron los cambios en commits: corrección POO-08 (`d0b8e85`), documentación
+  de reglas OpenAPI (`f6e54a8`), clientes de compañeros (`6a068ae`), escenario persistido
+  y pruebas (`de04d06`) y colección Insomnia (`e8d55f0`). La instalación inicial de
+  OpenAPI ya estaba incluida en el commit previo `882fe59`.
+- Antes del versionado se repitieron `./mvnw clean test` y las pruebas Node de Insomnia.
+  Se conserva el alcance individual: hashes de Sofía/Nicolás todavía pendientes de confirmación.
+- Se prepara un snapshot con README, bitácora y especificaciones aplicadas; un commit
+  posterior únicamente fija el enlace a ese snapshot, evitando un hash autorreferente.
+  No se hace merge ni push forzado; se publica la rama de trabajo existente.
+- Snapshot de implementación con todos los archivos: `d283f6594c9f727499c71332ae2427d5c8868bf0`.
+  El commit de enlace actualiza README y especificaciones para compartir ese hash;
+  no cambia el código probado. Resultado de la verificación previa: 142 pruebas Java
+  y 32 de scripts aprobadas. Los hashes de compañeros siguen pendientes.
+
+## Entrada 15 — Commits de compañeros confirmados
+
+**Fecha:** 2026-11-23. **Agente:** OpenCode. **Proveedor:** OpenAI.
+**Modelo exacto:** `openai/gpt-6.1-sol` (GPT-6.1 Sol).
+
+**Prompt recibido:** el alumno proporcionó el enlace al commit de Sofía
+`06a6fb297a5e9f9186d23b6dee7086fdaba94e30` y el hash de Nicolás
+`e9db16a93c925928734932e2759459a08747a1dd` para completar la documentación del grupo.
+
+- Se verificó la existencia de ambos commits en sus repositorios mediante la API de GitHub.
+  La primera consulta con Python falló por certificados locales; se usó curl con
+  verificación TLS normal, sin desactivar controles de seguridad ni cambiar configuración.
+- Se reemplazaron los pendientes y marcadores del README y se incorporaron enlaces
+  exactos en las especificaciones POO-09. No se clonó código ajeno ni se copiaron reglas.
+- Esta actualización es exclusivamente documental: no cambia el código previamente
+  probado ni atribuye a estos snapshots una prueba de arranque por clonación no realizada.
+- Se prepara un nuevo snapshot de entrega con los datos del grupo completos; el commit
+  posterior solo fija su enlace. La rama de publicación sigue siendo `feature/markdown`.
+- Snapshot de solución con hashes del grupo incorporados:
+  `a6e6b14a3626f1cf6cfa48547fb4b1d5596a03fb`. Se fija este enlace en README y
+  especificaciones mediante un commit posterior exclusivamente documental.

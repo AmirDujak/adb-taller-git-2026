@@ -51,7 +51,7 @@ class ExplosionIntegrationTests {
     }
 
     private Entidad guardar(String nombre, int vida, boolean cargado, Posicion posicion) {
-        return repository.save(Entidad.crear(nombre, vida, 5, 0.7,
+        return repository.save(new py.edu.uc.lp3.service.ReglasJuegoService().crear(nombre, vida, 5, 0.7,
                 new Hitbox(0.6, 1.8, 0.6), List.of("sonido"), List.of("drop"),
                 TipoEntidad.desdeNombre(nombre), cargado, posicion));
     }

@@ -24,14 +24,4 @@ public class Cerdo extends Entidad {
         return montable;
     }
 
-    @Override
-    public String comportamiento() {
-        if (!isViva()) {
-            return getNombre() + " ya desapareció.";
-        }
-        if (montable) {
-            return getNombre() + " puede ser montado por el jugador.";
-        }
-        return getNombre() + " no se puede montar.";
-    }
 }

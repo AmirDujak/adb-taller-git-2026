@@ -27,7 +27,10 @@ public class ExplosionController {
     @PostMapping("/simular")
     @Operation(summary = "Simular y aplicar una explosión", description = "Operación con efectos persistentes: "
             + "actualiza la vida de los supervivientes y elimina a los muertos y al Creeper emisor. "
-            + "La vida, carga y posiciones se leen de H2; los cambios son atómicos.")
+            + "La vida, carga y posiciones se leen de H2; los cambios son atómicos. "
+            + "Regla 1: onda de radio 3 bloques; para distancia menor a 3, daño = round(maximo * (1 - distancia / 3)); "
+            + "en el borde o fuera, cero. Regla 2: carga eléctrica duplica el máximo normal 20 a 40. "
+            + "El daño efectivo no supera la vida disponible. Origen no Creeper, muerto o sin posición: 409.")
     @ApiResponse(responseCode = "200", description = "Resultado de la explosión aplicada")
     @ApiResponse(responseCode = "400", ref = "#/components/responses/DatosInvalidos")
     @ApiResponse(responseCode = "404", ref = "#/components/responses/EntidadNoEncontrada")

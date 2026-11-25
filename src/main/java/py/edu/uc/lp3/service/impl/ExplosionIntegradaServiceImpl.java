@@ -20,23 +20,26 @@ import py.edu.uc.lp3.rest.dto.ExplosionIntegradaResultado.ObjetivoIntegrado;
 import py.edu.uc.lp3.service.EntidadRemotaService;
 import py.edu.uc.lp3.service.EntidadService;
 import py.edu.uc.lp3.service.ExplosionIntegradaService;
+import py.edu.uc.lp3.service.ReglasJuegoService;
 
 @Service
 public class ExplosionIntegradaServiceImpl implements ExplosionIntegradaService {
 
     private final EntidadService entidades;
     private final EntidadRemotaService remotas;
+    private final ReglasJuegoService reglas;
 
-    public ExplosionIntegradaServiceImpl(EntidadService entidades, EntidadRemotaService remotas) {
+    public ExplosionIntegradaServiceImpl(EntidadService entidades, EntidadRemotaService remotas, ReglasJuegoService reglas) {
         this.entidades = entidades;
         this.remotas = remotas;
+        this.reglas = reglas;
     }
 
     @Override
     public ExplosionIntegradaResultado previsualizar(ExplosionIntegradaDatos datos) {
         Evaluacion evaluacion = evaluar(datos);
         Creeper creeper = evaluacion.creeper();
-        return new ExplosionIntegradaResultado("LOCALES", Creeper.RADIO_EXPLOSION,
+        return new ExplosionIntegradaResultado("LOCALES", ReglasJuegoService.RADIO_EXPLOSION,
                 creeper.getId(), creeper.isCargado(), creeper.getVida(),
                 evaluacion.objetivos().stream().map(ObjetivoEvaluado::estimacion).toList());
     }
@@ -79,7 +82,7 @@ public class ExplosionIntegradaServiceImpl implements ExplosionIntegradaService 
                 }
             }
         }
-        return new ExplosionAplicadaResultado("LOCALES", Creeper.RADIO_EXPLOSION,
+        return new ExplosionAplicadaResultado("LOCALES", ReglasJuegoService.RADIO_EXPLOSION,
                 evaluacion.creeper().getId(), completa, List.copyOf(resultados));
     }
 
@@ -95,7 +98,7 @@ public class ExplosionIntegradaServiceImpl implements ExplosionIntegradaService 
             throw new EstadoEntidadInvalidoException("El jugador y el cerdo externos deben tener UUID distintos");
         }
         // La búsqueda local termina su transacción antes de consultar la red.
-        Creeper creeper = entidades.buscar(datos.creeperId()).prepararExplosion();
+        Creeper creeper = reglas.prepararExplosion(entidades.buscar(datos.creeperId()));
         var jugador = consultarObjetivo(creeper, datos.jugadorExternoId(), "JUGADOR");
         var cerdo = consultarObjetivo(creeper, datos.cerdoExternoId(), "CERDO");
         return new Evaluacion(creeper, List.of(jugador, cerdo));
@@ -108,11 +111,11 @@ public class ExplosionIntegradaServiceImpl implements ExplosionIntegradaService 
             throw new EstadoEntidadInvalidoException("La entidad remota " + id + " debe ser de tipo " + tipoEsperado);
         }
         var u = entidad.ubicacion();
-        double distancia = creeper.getPosicion().distanciaA(new Posicion(u.x(), u.y(), u.z()));
+        double distancia = reglas.distancia(creeper.getPosicion(), new Posicion(u.x(), u.y(), u.z()));
         if (!Double.isFinite(distancia)) {
             throw respuestaInvalida();
         }
-        int calculado = creeper.calcularDanioExplosion(distancia);
+        int calculado = reglas.calcularDanioExplosion(creeper, distancia);
         double aplicado = Math.min(entidad.salud(), calculado);
         double estimada = Math.max(0, entidad.salud() - aplicado);
         return new ObjetivoEvaluado(entidad, new ObjetivoIntegrado(entidad.id(), entidad.nombre(), entidad.tipo(), distancia,

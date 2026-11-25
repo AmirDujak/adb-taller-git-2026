@@ -16,11 +16,4 @@ public class Player extends Entidad {
                 velocidad, danoBase);
     }
 
-    @Override
-    public String comportamiento() {
-        if (!isViva()) {
-            return getNombre() + " ya fue derrotado.";
-        }
-        return getNombre() + " explora el mundo y combate a las entidades.";
-    }
 }

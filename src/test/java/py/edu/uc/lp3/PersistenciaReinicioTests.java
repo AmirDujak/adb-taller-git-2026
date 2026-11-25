@@ -2,6 +2,8 @@ package py.edu.uc.lp3;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
+import py.edu.uc.lp3.repository.JugadaCruzadaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.boot.WebApplicationType;
@@ -22,6 +24,7 @@ class PersistenciaReinicioTests {
                 "--spring.jpa.hibernate.ddl-auto=update", "--spring.h2.console.enabled=false"};
         Long playerId;
         Long creeperId;
+        Long jugadaId;
         try (var app = new SpringApplicationBuilder(Application.class).web(WebApplicationType.NONE)
                 .run(propiedades)) {
             var entidades = app.getBean(EntidadService.class);
@@ -29,6 +32,9 @@ class PersistenciaReinicioTests {
             playerId = entidades.crear(datos("Player", 1)).getId();
             entidades.crear(datos("Zombie", 2));
             app.getBean(ExplosionService.class).simular(new ExplosionDatos(creeperId));
+            // Fixture de autorizaciones: este test verifica almacenamiento, no consulta la red.
+            jugadaId = app.getBean(JugadaCruzadaRepository.class).saveAndFlush(new JugadaCruzada(
+                    UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), true, true)).getId();
         }
         try (var app = new SpringApplicationBuilder(Application.class).web(WebApplicationType.NONE)
                 .run(propiedades)) {
@@ -37,6 +43,10 @@ class PersistenciaReinicioTests {
             assertThat(entidades.buscar(playerId).getVida()).isEqualTo(7);
             assertThat(entidades.listar()).noneMatch(e -> e.getId().equals(creeperId));
             assertThat(entidades.listar()).anyMatch(e -> e instanceof Zombie && e.getVida() == 13);
+            var jugada = app.getBean(JugadaCruzadaRepository.class).findById(jugadaId).orElseThrow();
+            assertThat(jugada.isAceptadaSofia()).isTrue();
+            assertThat(jugada.isPuedeExplotarNicolas()).isTrue();
+            assertThat(jugada.getFecha()).isNotNull();
         }
     }
 

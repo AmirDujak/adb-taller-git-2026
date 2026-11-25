@@ -20,12 +20,5 @@ public class Oveja extends NoHostiles {
         return esquilada;
     }
 
-    @Override
-    protected String interactuar() {
-        if (!esquilada) {
-            esquilada = true;
-            return getNombre() + " fue esquilada, se obtiene lana.";
-        }
-        return getNombre() + " ya no tiene lana para esquilar.";
-    }
+    public void setEsquilada(boolean esquilada) { this.esquilada = esquilada; }
 }

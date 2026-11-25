@@ -14,10 +14,8 @@ public class ZombiePequeño extends Zombie {
     public ZombiePequeño(int vida, int danoBase, double velocidad, boolean hostilidad,
                          int velocidadAumentada) {
         super(vida, danoBase, velocidad, hostilidad);
-        if (velocidadAumentada < 0) {
-            throw new py.edu.uc.lp3.exceptions.EstadoEntidadInvalidoException("La velocidad aumentada no puede ser negativa");
-        }
         this.velocidadAumentada = velocidadAumentada;
+        setTipo(TipoEntidad.ZOMBIE_PEQUENO);
     }
 
     public int getVelocidadAumentada() {

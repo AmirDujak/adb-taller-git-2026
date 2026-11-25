@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import py.edu.uc.lp3.constants.ApiPaths;
 import py.edu.uc.lp3.rest.dto.EntidadDatos;
 import py.edu.uc.lp3.domain.Entidad;
-import py.edu.uc.lp3.domain.Movimientos;
 import py.edu.uc.lp3.service.EntidadService;
 
 @RestController
@@ -79,10 +78,6 @@ public class EntidadCrudController {
     @Operation(summary = "Consultar movimientos de las entidades persistidas")
     @ApiResponse(responseCode = "200", description = "ID, tipo y descripciones de avanzar y saltar por entidad")
     public List<Map<String, Object>> movimientos() {
-        return service.listar().stream().map(entidad -> {
-            Movimientos movimientos = entidad;
-            return Map.<String, Object>of("id", entidad.getId(), "tipo", entidad.getTipo(),
-                    "avanzar", movimientos.avanzar(), "saltar", movimientos.saltar());
-        }).toList();
+        return service.movimientos();
     }
 }

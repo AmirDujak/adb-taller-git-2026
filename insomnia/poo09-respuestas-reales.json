@@ -1,0 +1,66 @@
+{
+  "descripcion": "Captura HTTP real contra A1 temporal, usando las APIs de Sofía y Nicolás. No es un export de sesiones del motor de Insomnia. La colección reproducible está en poo09.yaml.",
+  "fechaUTC": "2026-11-23T21:34:43Z",
+  "bases": {
+    "A1": "http://127.0.0.1:18090",
+    "A2_SOFIA": "http://100.79.75.27:8081",
+    "A3_NICOLAS": "http://100.83.179.97:8080"
+  },
+  "almacenamientoA1": "H2 en archivo temporal, no data/entidades del alumno",
+  "preparacion": "Se reutilizaron participantes existentes mediante GET; no se crearon ni actualizaron datos de compañeros. Los UUID pueden dejar de estar disponibles.",
+  "feliz": {
+    "metodo": "POST",
+    "ruta": "/api/lp3/jugadas-cruzadas",
+    "solicitud": {
+      "creeperSofiaId": "3257d1ac-73b6-421e-801a-0dbffd67ba18",
+      "jugadorSofiaId": "4cf40b15-4f36-4a94-be20-adfe6ecac178",
+      "cerdoSofiaId": "5e889821-046a-466a-97fb-a9fadb124a8a",
+      "explosivoNicolasId": "b26bb20b-a15f-43ed-b4a9-f2c19480516e"
+    },
+    "estado": 201,
+    "respuesta": {
+      "aceptadaSofia": true,
+      "puedeExplotarNicolas": true,
+      "cerdoSofiaId": "5e889821-046a-466a-97fb-a9fadb124a8a",
+      "creeperSofiaId": "3257d1ac-73b6-421e-801a-0dbffd67ba18",
+      "explosivoNicolasId": "b26bb20b-a15f-43ed-b4a9-f2c19480516e",
+      "fecha": "2026-11-23T21:34:43.362884Z",
+      "id": 1,
+      "jugadorSofiaId": "4cf40b15-4f36-4a94-be20-adfe6ecac178"
+    },
+    "getPosterior": {"ruta": "/api/lp3/jugadas-cruzadas/1", "estado": 200, "cuerpoIdenticoAlPOST": true},
+    "getTrasReiniciarA1": {"ruta": "/api/lp3/jugadas-cruzadas/1", "estado": 200, "mismoIdYFecha": true},
+    "cantidadAntes": 0,
+    "cantidadDespues": 1
+  },
+  "rechazoSofia": {
+    "metodo": "POST",
+    "ruta": "/api/lp3/jugadas-cruzadas",
+    "solicitud": {
+      "creeperSofiaId": "225c8ba6-279b-4f7c-8531-0cda58db456d",
+      "jugadorSofiaId": "4cf40b15-4f36-4a94-be20-adfe6ecac178",
+      "cerdoSofiaId": "5e889821-046a-466a-97fb-a9fadb124a8a",
+      "explosivoNicolasId": "b26bb20b-a15f-43ed-b4a9-f2c19480516e"
+    },
+    "estado": 409,
+    "respuesta": {"proveedor": "A2_SOFIA", "codigo": "RECHAZO_COMPANERO", "error": "Un creeper muerto no puede explotar"},
+    "comparacionListaGETAntesDespues": "idéntica, contiene solo la jugada feliz id=1",
+    "cantidadAntes": 1,
+    "cantidadDespues": 1
+  },
+  "rechazoNicolas": {
+    "metodo": "POST",
+    "ruta": "/api/lp3/jugadas-cruzadas",
+    "solicitud": {
+      "creeperSofiaId": "3257d1ac-73b6-421e-801a-0dbffd67ba18",
+      "jugadorSofiaId": "4cf40b15-4f36-4a94-be20-adfe6ecac178",
+      "cerdoSofiaId": "5e889821-046a-466a-97fb-a9fadb124a8a",
+      "explosivoNicolasId": "1b52f12a-4e5d-4138-b95f-1b0fbf7f2145"
+    },
+    "estado": 409,
+    "respuesta": {"proveedor": "A3_NICOLAS", "codigo": "RECHAZO_COMPANERO", "error": "ACCION_ILEGAL"},
+    "comparacionListaGETAntesDespues": "idéntica, contiene solo la jugada feliz id=1",
+    "cantidadAntes": 1,
+    "cantidadDespues": 1
+  }
+}

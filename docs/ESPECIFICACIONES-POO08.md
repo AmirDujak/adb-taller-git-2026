@@ -12,7 +12,7 @@ resultados permanezcan después de reiniciar el proceso Java.
 
 `Entidad` es la clase abstracta persistida. `Player` hereda directamente; `Creeper`
 y `Zombie` heredan a través de `Hostiles`. Todos son entidades del mundo y soportan
-`Movimientos`. JPA guarda la familia con `SINGLE_TABLE`; `tipo` discrimina el subtipo
+un adaptador `Movimientos` en service. JPA guarda la familia con `SINGLE_TABLE`; `tipo` discrimina el subtipo
 en el JSON y en la base. `EntidadRepository` trabaja con la clase base.
 
 Se conservan las clases y demos anteriores. La simulación necesita y prueba al menos
@@ -102,7 +102,9 @@ todo se confirma en una transacción y un fallo revierte los cambios completos.
 El handler de la base devuelve 422 como respaldo. `EntidadNoEncontradaException`
 responde 404 y `ENTIDAD_NO_ENCONTRADA`; no se confunde ausencia con regla incumplida.
 Errores de lectura JSON responden 400 y `JSON_INVALIDO`.
-El cuerpo contiene `codigo` y `error`. Las hijas las lanzan objetos del dominio.
+El cuerpo contiene `codigo` y `error`. Tras la corrección de POO-08, las hijas las
+lanza exclusivamente la capa service. Las entidades conservan estado/mapeo JPA y no
+validan ni aplican reglas; no hay callbacks de validación de negocio.
 
 ## Cómo probar en 5–10 minutos
 

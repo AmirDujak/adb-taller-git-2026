@@ -1,4 +1,180 @@
-# Taller Git 2026 — Minecraft · POO-08
+# Taller Git 2026 — Minecraft · POO-09 y base POO-08
+
+## POO-09 — APIs cruzadas
+
+**Escenario:** registrar una operación de detonación coordinada solo si Sofía valida
+sus participantes y Nicolás autoriza un explosivo independiente. Se persiste la
+**jugada autorizada**, no una explosión ejecutada: no se aplica daño, no se consumen
+Creepers y no se llama al escenario de orquestación de los compañeros.
+
+### Estado de entrega y POO-08
+
+- **Corrección POO-08 recibida:** organización en paquetes **2/3**, con descuento por
+  validaciones y reglas dentro del dominio. **Observación atendida:** `EntidadServiceImpl`
+  valida y construye estados mediante `ReglasJuegoService`; `ExplosionServiceImpl` aplica
+  las reglas y excepciones desde la capa service. Entidades y embebidos solo conservan
+  estado/mapeo, sin excepciones de negocio ni callbacks de validación. Las demos delegan
+  en `DemostracionService`; la integración remota usa las mismas reglas locales de service.
+- **Mejora sin descuento atendida:** `domain/Main.java` se movió a
+  `src/test/java/py/edu/uc/lp3/demo/Main.java`.
+- Evidencia: `ArquitecturaDominioTests`, pruebas de reglas en `src/test/java/py/edu/uc/lp3/service/`
+  y regresión REST/JPA. El alumno confirmó que esta era **la única observación de POO-08**;
+  queda cerrada en el código y documentada para el criterio de corrección de POO-09.
+  Esto no cambia retroactivamente la nota de POO-08 ni se declara que obtuvo 24/24.
+- Los commits de Sofía y Nicolás fueron proporcionados por el alumno y su existencia
+  se verificó en GitHub. Los enlaces POO-08 al final son históricos.
+- Código, pruebas, colección y documentación POO-09 están versionados; el mapa del grupo
+  incluye los tres commits y las instrucciones de arranque. Las pruebas HTTP previas
+  fueron contra los servicios accesibles: no se afirma haber clonado y ejecutado los
+  commits ajenos fijados aquí.
+
+### Mapa del grupo (Minecraft)
+
+| Rol en mi entrega | Autor | Base | Documento OpenAPI |
+|---|---|---|---|
+| A1 | Amir Dujak | `http://100.78.121.31:8080` | http://100.78.121.31:8080/v3/api-docs |
+| A2 | Sofía Torres | `http://100.79.75.27:8081` | http://100.79.75.27:8081/v3/api-docs |
+| A3 | Nicolás Rodriguez | `http://100.83.179.97:8080` | http://100.83.179.97:8080/v3/api-docs |
+
+Estas son las direcciones compartidas por **Tailscale**: requieren acceso autorizado a
+esa red y que los tres servicios estén encendidos; no requieren estar en la misma LAN.
+Desde la máquina de Amir también se puede usar `http://localhost:8080`. Cada uno es A1
+de su propia entrega; los tres README deben identificar las mismas tres bases.
+
+| Autor | Repositorio | Commit reproducible |
+|---|---|---|
+| Amir | https://github.com/AmirDujak/adb-taller-git-2026 | [a6e6b14a3626f1cf6cfa48547fb4b1d5596a03fb](https://github.com/AmirDujak/adb-taller-git-2026/commit/a6e6b14a3626f1cf6cfa48547fb4b1d5596a03fb) |
+| Sofía | https://github.com/Sofia-torres00/st-taller-git-2026 | [06a6fb297a5e9f9186d23b6dee7086fdaba94e30](https://github.com/Sofia-torres00/st-taller-git-2026/commit/06a6fb297a5e9f9186d23b6dee7086fdaba94e30) |
+| Nicolás | https://github.com/NicoRodriguez85677/NRodriguez-taller-git-2026 | [e9db16a93c925928734932e2759459a08747a1dd](https://github.com/NicoRodriguez85677/NRodriguez-taller-git-2026/commit/e9db16a93c925928734932e2759459a08747a1dd) |
+
+Swagger UI: [Amir](http://100.78.121.31:8080/swagger-ui/index.html),
+[Sofía](http://100.79.75.27:8081/swagger-ui/index.html),
+[Nicolás](http://100.83.179.97:8080/swagger-ui/index.html).
+Estos hashes son los acordados para la entrega. Si un compañero cambia su servicio,
+debe publicar y comunicar el nuevo hash: el último commit de GitHub por sí solo no
+demuestra qué versión está corriendo en la notebook.
+
+| Dueño | Dos reglas publicadas | Regla/operación consumida en mi escenario |
+|---|---|---|
+| Amir | Onda expansiva: daño decreciente hasta radio 3; carga eléctrica: máximo 20 pasa a 40. | Los compañeros pueden consultar mi OpenAPI y `/api/lp3/explosiones/simular`; esta última **modifica** mi H2. |
+| Sofía | Participantes distintos de tipos Creeper, jugador y cerdo con Creeper vivo; daño de explosión hasta 20 dentro de radio 6. | `POST /api/explosiones/validar`: consulta las condiciones de los participantes sin daño ni escrituras. |
+| Nicolás | Solo detona un Creeper vivo, no detonando ni ya explotado; daño decreciente hasta radio 4. | `GET /api/minecraft/explosivos/{id}`: consulta la capacidad actual de explotar. |
+
+Fuentes: documentos OpenAPI enlazados arriba, leídos antes de implementar los clientes.
+No se clonó código ajeno para copiar reglas. Si cambia una ruta hay que actualizar el
+cliente según el contrato nuevo; cambiar solo el documento no reconfigura Java.
+La validación de Sofía **no** exige objetivos vivos o dentro del radio.
+
+### Arranque de los tres servicios
+
+Requisito JDK 21. Arrancar primero Sofía y Nicolás y después Amir. En notebooks distintas,
+cada uno usa su repositorio y ejecuta `./mvnw spring-boot:run` en el puerto acordado.
+Para una sola máquina, usar carpetas separadas, bases separadas y puertos diferentes:
+
+1. **Sofía:** clonar `https://github.com/Sofia-torres00/st-taller-git-2026.git` y entrar
+   en `st-taller-git-2026`. Seleccionar el commit con
+   `git switch --detach 06a6fb297a5e9f9186d23b6dee7086fdaba94e30` y ejecutar
+   `./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8081`.
+2. **Nicolás:** clonar `https://github.com/NicoRodriguez85677/NRodriguez-taller-git-2026.git`
+   y entrar en `NRodriguez-taller-git-2026`. Seleccionar el commit
+   con `git switch --detach e9db16a93c925928734932e2759459a08747a1dd` y ejecutar
+   `./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8082`.
+3. **Amir:** clonar `https://github.com/AmirDujak/adb-taller-git-2026.git` y seleccionar
+   el snapshot POO-09 con `git switch --detach a6e6b14a3626f1cf6cfa48547fb4b1d5596a03fb`. Ejecutar:
+
+```bash
+SOFIA_API_BASE_URL=http://localhost:8081 NICOLAS_API_BASE_URL=http://localhost:8082 ./mvnw spring-boot:run
+```
+
+El arranque de los commits ajenos aún no fue verificado por clonación.
+Actualizar también las tres bases en Insomnia cuando se use el esquema local.
+La colección viene configurada para las tres direcciones Tailscale del mapa. No configurar a los compañeros para que
+la validación invoque de nuevo este escenario. Sus orquestadores propios no se utilizan.
+
+| Propiedad de A1 | Variable / valor predeterminado |
+|---|---|
+| `poo09.sofia.base-url` | `SOFIA_API_BASE_URL` / `http://100.79.75.27:8081` |
+| `poo09.nicolas.base-url` | `NICOLAS_API_BASE_URL` / `http://100.83.179.97:8080` |
+| `poo09.connect-timeout` | `3s` (sobrescribible como propiedad Spring) |
+| `poo09.request-timeout` | `10s` por consulta completa |
+
+### Contrato y persistencia
+
+```http
+POST /api/lp3/jugadas-cruzadas
+Content-Type: application/json
+
+{"creeperSofiaId":"UUID","jugadorSofiaId":"UUID","cerdoSofiaId":"UUID","explosivoNicolasId":"UUID"}
+```
+
+Los cuatro valores son UUID reales de sus bases; el ejemplo no se puede enviar literalmente.
+Los participantes de Sofía y el explosivo de Nicolás son **independientes**. No se supone
+que el mismo ID exista en ambos proveedores. La operación combina las autorizaciones de
+los dos explosivos de una operación coordinada, no sincroniza mundos ni ejecuta detonaciones.
+
+1. Sofía valida primero para descartar participantes inválidos antes de consultar el
+   segundo explosivo. El cliente comprueba `aceptada=true` y los tres IDs devueltos.
+2. Nicolás debe devolver el ID solicitado y `puedeExplotar=true`. HTTP 200 por sí solo no basta.
+3. Solo entonces comienza una transacción local y se inserta `jugadas_cruzadas`: ID Long,
+   fecha UTC, cuatro UUID y las dos aprobaciones. No hay escrituras durante las consultas.
+
+El éxito devuelve **201**, la jugada y `Location`. `GET /api/lp3/jugadas-cruzadas` lista
+en orden de ID; `GET /api/lp3/jugadas-cruzadas/{id}` permite recuperarla, incluso tras
+reiniciar con la H2 en archivo. El GET no necesita que los compañeros estén conectados.
+
+Errores: **400** entrada propia inválida; **409** rechazo remoto (incluidos 400/409 del
+compañero y booleanos falsos); **404** participante remoto inexistente; **502** fallo de
+conexión, HTTP inesperado o contrato inválido; **504** timeout. Los errores remotos incluyen
+`codigo`, `proveedor` (`A2_SOFIA` / `A3_NICOLAS`) y `error`. Se traduce el error, conservando
+cuando existe su mensaje público `error` (limitado a 500 caracteres), no el cuerpo completo.
+
+Rechazos y fallos técnicos no guardan jugadas ni auditorías en H2, ni modifican entidades.
+Un fallo durante el INSERT revierte la transacción. No hay transacción distribuida,
+reintentos automáticos ni reservas: las aprobaciones describen el estado consultado.
+Repetir un éxito **crea otra jugada**, no hay clave de idempotencia.
+
+### Insomnia y verificación
+
+Importar [`insomnia/poo09.yaml`](insomnia/poo09.yaml). Recorrer carpetas **01 → 02 → 03 → 04**,
+una iteración, secuencialmente. No detener por los 409 esperados.
+
+- **01:** lee los tres OpenAPI y crea datos nuevos de prueba en los compañeros, con IDs
+  capturados automáticamente: Creeper vivo y muerto, jugador, cerdo, Creeper de Nicolás
+  y Zombie no explosivo. **Esta preparación sí escribe en las bases remotas**; usar bases
+  de desarrollo acordadas. Repetirla crea más entidades; no borra datos ajenos.
+- **02:** registra el escenario feliz, recupera la jugada y verifica un registro adicional.
+- **03:** Creeper muerto provoca rechazo de Sofía; compara la lista completa antes/después.
+- **04:** Sofía acepta pero el Zombie de Nicolás provoca rechazo; compara la lista completa.
+- Para comprobar persistencia, reiniciar A1 y repetir **solo** «Recuperar jugada».
+
+Las respuestas reales de una verificación sin escrituras remotas quedan en
+[`insomnia/poo09-respuestas-reales.json`](insomnia/poo09-respuestas-reales.json).
+Son evidencia HTTP, no una afirmación de haber ejecutado la interfaz gráfica de Insomnia.
+Si un compañero no responde: comprobar red/URL, avisar al autor y repetir manualmente solo
+cuando esté disponible. No declarar éxito con mocks ni guardar una jugada ante timeout.
+
+```bash
+./mvnw test
+node --test insomnia/tests/*.test.cjs
+```
+
+Las pruebas Java cubren aprobación, rechazo atribuido de ambos, booleano falso, contrato
+inválido, HTTP inesperado, timeouts, entrada inválida, rollback y persistencia tras reabrir H2.
+No usan `./data/entidades`. El documento para Classroom está en
+[`docs/ESPECIFICACIONES-POO09.md`](docs/ESPECIFICACIONES-POO09.md).
+
+**Commit de solución POO-09 con los hashes de compañeros incorporados:**
+https://github.com/AmirDujak/adb-taller-git-2026/commit/a6e6b14a3626f1cf6cfa48547fb4b1d5596a03fb
+
+Incluye corrección POO-08, OpenAPI, clientes, escenario, pruebas, colección, bitácora
+y especificaciones, junto con los commits exactos de Sofía y Nicolás. El commit
+posterior solo fija este enlace y las instrucciones para seleccionar ese snapshot;
+no cambia la implementación. No usar el enlace histórico POO-08 como entrega de este challenge.
+Consigna: [POO-09](https://github.com/alefq/afq-taller-git-2024/blob/main/docs/ejercicio-poo-09-apis-cruzadas-2026-11-16.md).
+
+---
+
+## Base POO-08 y funcionalidades anteriores
 
 **Alumno:** Amir Dujak · Trabajo individual · [Repositorio](https://github.com/AmirDujak/adb-taller-git-2026)
 
@@ -67,8 +243,8 @@ y `CERDO`, respectivamente. El Creeper debe estar vivo y tener posición guardad
 Las coordenadas de los dos proyectos se interpretan como pertenecientes al mismo
 mundo y con la misma unidad de medida; no se realiza una transformación espacial.
 
-La integración reutiliza `EntidadService.buscar()`, `prepararExplosion()`,
-`Posicion.distanciaA()` y `Creeper.calcularDanioExplosion()`. Del proyecto remoto
+La integración reutiliza `EntidadService.buscar()` y `ReglasJuegoService` para preparar
+la explosión, calcular distancias y daño. Las entidades no ejecutan esas reglas. Del proyecto remoto
 adopta la validación de tipos de los participantes y sus UUID distintos, y consulta
 sus datos mediante **WebClient**, usando únicamente `GET /api/entidades/{id}`.
 No llama a `/api/explosiones`, no consume al Creeper, no actualiza salud ni elimina
@@ -164,8 +340,12 @@ py.edu.uc.lp3
 ```
 
 El controller depende del contrato `EntidadService`/`ExplosionService`; la implementación
-recibe `EntidadRepository` por constructor. Las reglas numéricas viven en el dominio.
-El service coordina consultas, mensajes del juego y guardado dentro de una transacción.
+recibe `EntidadRepository` por constructor. Las validaciones, reglas numéricas y sus
+excepciones viven exclusivamente en **service**, compartidas en `ReglasJuegoService`.
+Las entidades contienen estado, accesores y mapeo JPA. No hay validación de negocio
+en constructores o callbacks. El service coordina consultas, mensajes y transacciones.
+`DemostracionService` mantiene las demos; `ReglasJuegoService` ofrece un adaptador
+`Movimientos` para las descripciones sin trasladar reglas a la Entity.
 
 ## H2: propiedades y consola
 
@@ -239,9 +419,10 @@ curl -i http://localhost:8080/api/lp3/entidades \
   vacíos ni superar 255 caracteres. Los getters devuelven copias no modificables.
 - Posición opcional; si se envía, requiere las tres coordenadas finitas.
 - Solo un Creeper puede estar cargado. El subtipo no se cambia por PUT.
-- La vida solo baja mediante `recibirDanio`, nunca queda negativa y una entidad muerta no se mueve.
-- No hay setters públicos. Constructores/fábrica, actualización y callbacks JPA validan;
-  el esquema nuevo también tiene restricciones numéricas `CHECK`.
+- El servicio de reglas aplica daño sin vida negativa e impide el movimiento de entidades muertas.
+- El service valida antes de crear/actualizar; las entidades exponen asignación de estado
+  para JPA y servicios, sin reglas ni excepciones propias. No hay callbacks de negocio.
+  Las restricciones SQL `CHECK` siguen como integridad de almacenamiento, no reemplazan al service.
 
 En POST son obligatorios los campos comunes del ejemplo; `tipo` puede omitirse por
 compatibilidad: se deduce del nombre conocido o queda `OTRA`. La carga predeterminada
@@ -254,12 +435,12 @@ Los atributos específicos de las demos que no figuran en `EntidadDatos` no se e
 
 ## Dos reglas del juego y simulación
 
-1. **Onda expansiva:** `Creeper.calcularDanioExplosion` reduce la vida de `Player`, `Zombie` y otras entidades según su distancia tridimensional, sin daño desde el borde de 3 bloques.
+1. **Onda expansiva:** `ReglasJuegoService.calcularDanioExplosion` calcula daño para `Player`, `Zombie` y otras entidades según su distancia tridimensional, sin daño desde el borde de 3 bloques.
 2. **Carga eléctrica:** un `Creeper` cargado duplica el daño de esa misma onda; al consumirse la explosión desaparece el origen y se eliminan los objetivos cuya vida llega a cero.
 
 Son reglas propias del práctico, no una réplica exacta del juego: el máximo normal es
 20, cargado 40; para `distancia < 3`, daño = `round(maximo * (1 - distancia / 3))`.
-`Entidad.recibirDanio` limita la pérdida a la vida disponible. No hay explosiones en cadena.
+`ReglasJuegoService.recibirDanio` limita la pérdida a la vida disponible. No hay explosiones en cadena.
 Se omiten objetivos sin posición o fuera del radio; los del borde reciben cero.
 
 Crear primero un Creeper en `(0,64,0)`, un Player de vida 20 en `(1,64,0)` y un Zombie
@@ -286,7 +467,7 @@ lo persistido es el estado resultante del mundo.
 ## Excepciones y respuestas
 
 `JuegoException extends RuntimeException` es la base no comprobada; el advice tiene
-un handler por tipo. Las hijas las lanza el dominio, no el controller.
+un handler por tipo. Las hijas las lanza exclusivamente la capa service, no el dominio ni el controller.
 
 | Tipo | HTTP | `codigo` | Ejemplo |
 |---|---|---|---|
@@ -312,8 +493,8 @@ obligaría a capturarla/declararla y requeriría revisar la configuración de ro
 3. **Herencia y tablas:** elegí `SINGLE_TABLE` porque los mobs comparten casi todos los atributos y la explosión consulta toda la familia; evita joins por objetivo, a cambio de columnas específicas anulables. La fórmula de Hibernate mantiene compatibilidad con tipos antiguos nulos.
 4. **Subtipo JSON:** Jackson lee `tipo` en `EntidadDatos` y lo escribe mediante `getTipo`; una fábrica explícita construye el subtipo real. No uso nombres Java arbitrarios ni tipado global de Jackson: el enum limita las clases admitidas.
 5. **Interfaz y repositorio:** Spring Data implementa `EntidadRepository`; el service depende de ese contrato y el controller del contrato del service, no de SQL ni de una implementación H2. Como en POO-07, el cliente conoce mensajes, no cómo se cumplen.
-6. **Protocolo del dominio:** `GET /api/lp3/entidades/movimientos` usa variables `Movimientos` y llama `avanzar` y `saltar` sobre Player, hostiles y no hostiles; no necesita distinguir clases y no cambia posiciones ni vidas.
-7. **Ocultamiento:** `Entidad`, `Hitbox` y `Posicion` sostienen invariantes. En Insomnia, pedidos 03/06 → 07 → 08 muestran que el POST ilegal no agrega filas. Los callbacks JPA vuelven a validar antes de escribir.
+6. **Protocolo:** `GET /api/lp3/entidades/movimientos` delega al service; un adaptador `Movimientos` describe avanzar/saltar sin cambiar posiciones ni vidas. La Entity ya no implementa acciones de negocio.
+7. **Validaciones:** `ReglasJuegoService` valida datos antes de asignarlos a `Entidad`, `Hitbox` y `Posicion`. En Insomnia, pedidos 03/06 → 07 → 08 muestran que el POST ilegal no agrega filas. No hay validación de negocio en callbacks JPA.
 8. **PUT/PATCH:** PUT exige los campos comunes; solo las tres extensiones opcionales conservan lo anterior si se omiten. Esta compatibilidad está documentada y probada. PATCH no está implementado.
 9. **DELETE:** retirar del mundo llama `retirarDelMundo` y elimina físicamente el registro y sus colecciones; devuelve 204. No representa daño ni entrega inventario a otro jugador.
 10. **Dos reglas:** la onda aplica daño a varios objetivos; la carga duplica esas pérdidas. La explosión consume el Creeper, elimina muertos y persiste supervivientes; GET muestra el resultado.
@@ -337,25 +518,22 @@ classDiagram
         -int vida
         -TipoEntidad tipo
         -Posicion posicion
-        +comportamiento() String
-        +recibirDanio(cantidad) String
-        +prepararExplosion() Creeper
+        +setVida(vida)
+        +asignarEstado(datos)
     }
     class Hostiles {
         <<abstract>>
-        +comportamiento() String
     }
     class Creeper {
         -Boolean cargado
-        +cargarConRayo()
-        +calcularDanioExplosion(distancia) int
-        +prepararExplosion() Creeper
+        +setCargado(cargado)
     }
-    class Player {
-        +comportamiento() String
-    }
-    class Zombie {
-        +comportamiento() String
+    class ReglasJuegoService {
+        +validarInicial(entidad)
+        +prepararExplosion(entidad) Creeper
+        +calcularDanioExplosion(creeper, distancia) int
+        +recibirDanio(entidad, cantidad) String
+        +movimientos(entidad) Movimientos
     }
     class EntidadRepository {
         <<interface>>
@@ -367,7 +545,6 @@ classDiagram
     class EstadoEntidadInvalidoException
     class ExplosionNoPermitidaException
     class EntidadNoEncontradaException
-    Movimientos <|.. Entidad
     Entidad <|-- Hostiles
     Entidad <|-- Player
     Hostiles <|-- Creeper
@@ -375,18 +552,20 @@ classDiagram
     Entidad *-- Hitbox
     Entidad *-- Posicion
     EntidadCrudController --> EntidadService
-    EntidadCrudController ..> Movimientos
+    ReglasJuegoService ..> Movimientos : construye adaptador
     EntidadServiceImpl ..|> EntidadService
     EntidadServiceImpl --> EntidadRepository
+    EntidadServiceImpl --> ReglasJuegoService
     ExplosionController --> ExplosionService
     ExplosionServiceImpl ..|> ExplosionService
     ExplosionServiceImpl --> EntidadRepository
-    ExplosionServiceImpl --> Creeper
+    ExplosionServiceImpl --> ReglasJuegoService
+    ReglasJuegoService --> Entidad : lee y asigna estado
     EntidadRepository --> Entidad : persiste SINGLE_TABLE
     JuegoException <|-- EstadoEntidadInvalidoException
     JuegoException <|-- ExplosionNoPermitidaException
-    Entidad ..> EstadoEntidadInvalidoException : lanza
-    Creeper ..> ExplosionNoPermitidaException : lanza
+    ReglasJuegoService ..> EstadoEntidadInvalidoException : lanza
+    ReglasJuegoService ..> ExplosionNoPermitidaException : lanza
     JuegoExceptionHandler ..> JuegoException : handler base
     JuegoExceptionHandler ..> EstadoEntidadInvalidoException : handler 400
     JuegoExceptionHandler ..> ExplosionNoPermitidaException : handler 409
@@ -398,17 +577,17 @@ Flecha sólida con triángulo: **herencia**; línea discontinua con triángulo:
 **composición**. Las dos excepciones heredan de la misma base, no una de la otra.
 El diagrama enfoca las tres clases de la simulación; los demás mobs anteriores permanecen.
 
-## Sobrecarga, sobreescritura y demos anteriores
+## Demos anteriores y corrección de responsabilidades
 
-`Entidad.comportamiento()` sigue siendo abstracto. `Player` y `Hostiles` lo
-sobreescriben; `Zombie` también lo redefine y `Creeper` especializa `accionDeAtaque`.
-La misma llamada usa el comportamiento de la clase real: **sobreescritura**.
+Para atender la observación POO-08, `comportamiento`, daño, movimiento y disparo se
+ejecutan ahora en servicios, no en métodos de las entidades. La herencia JPA se mantiene;
+no se presenta la versión anterior con reglas polimórficas en Entities como arquitectura actual.
 
 `Player()` y `Player(vida,danoBase,velocidad)`, así como los constructores de Zombie,
-son **sobrecarga**: mismo nombre, parámetros diferentes. También siguen existiendo
-`Esqueleto.disparar()` y `Esqueleto.disparar(int distancia)`. JPA usa constructores
+son **sobrecarga**: mismo nombre, parámetros diferentes. Las variantes de disparo ahora
+son `ReglasJuegoService.disparar(esqueleto)` y `disparar(esqueleto, distancia)`. JPA usa constructores
 sin argumentos públicos/protegidos; solo `Entidad()` protegido se reserva para hidratación.
-Los constructores públicos de negocio siguen dejando instancias legales.
+La validación de esos datos corresponde a los servicios, no a los constructores.
 
 Se conservan las demos GET temporales (no son el CRUD ni guardan sus acciones):
 `/entidad/{tipo}`, `/entidades/zombie`, `/entidades/esqueleto/disparar`,
@@ -464,7 +643,7 @@ Se ejecutan los scripts reales del YAML con respuestas simuladas: captura de las
 siete variables, reemplazo de IDs anteriores y rechazo de respuestas/IDs inválidos.
 Incluyen respuestas 201 con `status` textual o vacío, como las que expone Insomnia.
 
-## Entrega
+## Entrega histórica POO-08
 
 - [Especificaciones para adjuntar en Classroom](docs/ESPECIFICACIONES-POO08.md).
 - [Bitácora de asistencia IA](BITACORA.md), con agente, modelo exacto y prompts.
@@ -472,7 +651,7 @@ Incluyen respuestas 201 con `status` textual o vacío, como las que expone Insom
   y [rúbrica](https://github.com/alefq/afq-taller-git-2024/blob/main/docs/RUBRICA-ejercicios-lp3-2026.md).
 - Licencia: [Apache 2.0](LICENSE).
 
-**Commit de la solución completa:**
+**Commit histórico de POO-08 (no es la entrega POO-09):**
 https://github.com/AmirDujak/adb-taller-git-2026/commit/8fb53f29c950ac7e47357b2c17c8cc31544257df
 
 El commit posterior solo fija este enlace en la documentación; el snapshot enlazado

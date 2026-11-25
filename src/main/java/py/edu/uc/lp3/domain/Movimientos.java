@@ -1,7 +1,7 @@
 package py.edu.uc.lp3.domain;
 
 /**
- * Contrato de movimientos que toda entidad del juego puede realizar.
+ * Contrato de descripciones de movimiento, implementado por un adaptador en service.
  * Corresponde al bloque "Movimientos" del diagrama (Avanzar, Rotar, Saltar).
  * Cada método devuelve la descripción de lo que ocurrió.
  */
